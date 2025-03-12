@@ -9,9 +9,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/ignite/gnovm/x/gnovm/types"
+
+	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
+	"github.com/gnolang/gno/tm2/pkg/sdk/auth"
+	"github.com/gnolang/gno/tm2/pkg/sdk/bank"
+	"github.com/gnolang/gno/tm2/pkg/sdk/params"
 )
 
 type Keeper struct {
+	*vm.VMKeeper
+
 	storeService corestore.KVStoreService
 	cdc          codec.Codec
 	addressCodec address.Codec
@@ -50,6 +57,14 @@ func NewKeeper(
 		panic(err)
 	}
 	k.Schema = schema
+
+	k.VMKeeper = vm.NewVMKeeper(
+		nil,
+		nil,
+		auth.AccountKeeper{},
+		bank.BankKeeper{},
+		params.ParamsKeeper{},
+	)
 
 	return k
 }
