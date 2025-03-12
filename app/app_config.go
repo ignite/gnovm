@@ -26,6 +26,8 @@ import (
 	_ "github.com/cosmos/cosmos-sdk/x/auth/tx/config" // import for side-effects
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	_ "github.com/ignite/gnovm/x/gnovm/module"
+	gnovmmoduletypes "github.com/ignite/gnovm/x/gnovm/types"
 )
 
 var (
@@ -67,11 +69,13 @@ var (
 						distrtypes.ModuleName,
 						stakingtypes.ModuleName,
 						// chain modules
+						gnovmmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/beginBlockers
 					},
 					EndBlockers: []string{
 						stakingtypes.ModuleName,
 						// chain modules
+						gnovmmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/endBlockers
 					},
 					// The following is mostly only needed when ModuleName != StoreKey name.
@@ -92,6 +96,7 @@ var (
 						stakingtypes.ModuleName,
 						genutiltypes.ModuleName,
 						// chain modules
+						gnovmmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/initGenesis
 					},
 				}),
@@ -136,6 +141,10 @@ var (
 			{
 				Name:   consensustypes.ModuleName,
 				Config: appconfig.WrapAny(&consensusmodulev1.Module{}),
+			},
+			{
+				Name:   gnovmmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&gnovmmoduletypes.Module{}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},

@@ -28,6 +28,7 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
 	"github.com/ignite/gnovm/docs"
+	gnovmmodulekeeper "github.com/ignite/gnovm/x/gnovm/keeper"
 )
 
 const (
@@ -59,6 +60,7 @@ type App struct {
 	StakingKeeper *stakingkeeper.Keeper
 	DistrKeeper   distrkeeper.Keeper
 
+	GnovmKeeper gnovmmodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// simulation manager
@@ -127,6 +129,7 @@ func New(
 		&app.BankKeeper,
 		&app.StakingKeeper,
 		&app.DistrKeeper,
+		&app.GnovmKeeper,
 	); err != nil {
 		panic(err)
 	}

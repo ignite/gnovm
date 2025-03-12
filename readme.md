@@ -1,7 +1,13 @@
 # GnoVM Cosmos SDK Module
 
-Cosmos SDK module for [GnoVM](https://github.com/gnolang/gno), a virtual machine for the Gno programming language.
+Cosmos SDK module for [GnoVM](https://github.com/gnolang/gno), a virtual machine for the Gno programming language.  
 Cosmos SDK module scaffolded with [Ignite](https://ignite.com/), a developer-friendly framework for building Cosmos SDK applications.
+
+## Installation
+
+To install the GnoVM module, please follow the instructions below:
+
+> TBD
 
 ## Scaffolded with Ignite
 
