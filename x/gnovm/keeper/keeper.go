@@ -6,6 +6,7 @@ import (
 	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
 	corestore "cosmossdk.io/core/store"
+	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/runtime"
@@ -18,6 +19,7 @@ import (
 type Keeper struct {
 	*vm.VMKeeper
 
+	logger       log.Logger
 	storeService corestore.KVStoreService
 	cdc          codec.Codec
 	addressCodec address.Codec
@@ -33,6 +35,7 @@ type Keeper struct {
 }
 
 func NewKeeper(
+	logger log.Logger,
 	storeKey *storetypes.KVStoreKey,
 	cdc codec.Codec,
 	addressCodec address.Codec,
@@ -48,6 +51,7 @@ func NewKeeper(
 	sb := collections.NewSchemaBuilder(storeService)
 
 	k := Keeper{
+		logger:       logger,
 		storeService: storeService,
 		cdc:          cdc,
 		addressCodec: addressCodec,
@@ -70,6 +74,8 @@ func NewKeeper(
 		vmBankKeeper{k.bankKeeper},
 		&vmKeeperParams{&k},
 	)
+
+	// k.VMKeeper.Initialize(&slog.Logger{}, nil) // TODO
 
 	return k
 }

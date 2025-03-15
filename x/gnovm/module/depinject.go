@@ -5,6 +5,7 @@ import (
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/depinject"
 	"cosmossdk.io/depinject/appconfig"
+	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -28,6 +29,7 @@ func init() {
 type ModuleInputs struct {
 	depinject.In
 
+	Logger       log.Logger
 	Config       *types.Module
 	StoreKey     *storetypes.KVStoreKey
 	Cdc          codec.Codec
@@ -51,6 +53,7 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		authority = authtypes.NewModuleAddressOrBech32Address(in.Config.Authority)
 	}
 	k := keeper.NewKeeper(
+		in.Logger,
 		in.StoreKey,
 		in.Cdc,
 		in.AddressCodec,
