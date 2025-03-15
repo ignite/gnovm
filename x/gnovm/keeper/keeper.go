@@ -6,13 +6,12 @@ import (
 	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
 	corestore "cosmossdk.io/core/store"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/ignite/gnovm/x/gnovm/types"
 
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
-	"github.com/gnolang/gno/tm2/pkg/sdk/auth"
-	"github.com/gnolang/gno/tm2/pkg/sdk/bank"
 	"github.com/gnolang/gno/tm2/pkg/sdk/params"
 )
 
@@ -28,14 +27,19 @@ type Keeper struct {
 
 	Schema collections.Schema
 	Params collections.Item[types.Params]
+
+	authKeeper types.AuthKeeper
+	bankKeeper types.BankKeeper
 }
 
 func NewKeeper(
+	storeKey *storetypes.KVStoreKey,
 	storeService corestore.KVStoreService,
 	cdc codec.Codec,
 	addressCodec address.Codec,
 	authority []byte,
-
+	authKeeper types.AuthKeeper,
+	bankKeeper types.BankKeeper,
 ) Keeper {
 	if _, err := addressCodec.BytesToString(authority); err != nil {
 		panic(fmt.Sprintf("invalid authority address %s: %s", authority, err))
@@ -48,8 +52,9 @@ func NewKeeper(
 		cdc:          cdc,
 		addressCodec: addressCodec,
 		authority:    authority,
-
-		Params: collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+		Params:       collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+		authKeeper:   authKeeper,
+		bankKeeper:   bankKeeper,
 	}
 
 	schema, err := sb.Build()
@@ -59,10 +64,10 @@ func NewKeeper(
 	k.Schema = schema
 
 	k.VMKeeper = vm.NewVMKeeper(
-		nil,
-		nil,
-		auth.AccountKeeper{},
-		bank.BankKeeper{},
+		storeKey, // TODO(@julienrbrt): possible use another one.
+		storeKey,
+		NewVMAuthKeeper(k.authKeeper),
+		NewVMBankKeeper(k.bankKeeper),
 		params.ParamsKeeper{},
 	)
 

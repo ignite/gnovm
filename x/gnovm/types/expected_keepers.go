@@ -10,14 +10,14 @@ import (
 // AuthKeeper defines the expected interface for the Auth module.
 type AuthKeeper interface {
 	AddressCodec() address.Codec
-	GetAccount(context.Context, sdk.AccAddress) sdk.AccountI // only used for simulation
-	// Methods imported from account should be defined here
+	GetAccount(context.Context, sdk.AccAddress) sdk.AccountI
 }
 
 // BankKeeper defines the expected interface for the Bank module.
 type BankKeeper interface {
+	GetAllBalances(ctx context.Context, addr sdk.AccAddress) sdk.Coins
 	SpendableCoins(context.Context, sdk.AccAddress) sdk.Coins
-	// Methods imported from bank should be defined here
+	SendCoins(ctx context.Context, from, to sdk.AccAddress, amt sdk.Coins) error
 }
 
 // ParamSubspace defines the expected Subspace interface for parameters.

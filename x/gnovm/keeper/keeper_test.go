@@ -37,10 +37,13 @@ func initFixture(t *testing.T) *fixture {
 	authority := authtypes.NewModuleAddress(types.GovModuleName)
 
 	k := keeper.NewKeeper(
+		storeKey,
 		storeService,
 		encCfg.Codec,
 		addressCodec,
 		authority,
+		nil, /* todo use mock */
+		nil, /* todo use mock*/
 	)
 
 	// Initialize params

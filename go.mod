@@ -31,7 +31,7 @@ require (
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
 	github.com/cosmos/cosmos-sdk v0.50.12
 	github.com/cosmos/gogoproto v1.7.0
-	github.com/gnolang/gno v0.0.0-20250312140735-c48c59bd608d
+	github.com/gnolang/gno v0.0.0-20250314172932-5e017a4e7d89
 	github.com/golang/protobuf v1.5.4
 	github.com/gorilla/mux v1.8.1
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
