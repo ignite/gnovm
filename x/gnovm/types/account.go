@@ -68,7 +68,7 @@ func (a *accountWrapper) SetCoins(coins std.Coins) error {
 
 // SetPubKey implements std.Account.
 func (a *accountWrapper) SetPubKey(pub crypto.PubKey) error {
-	return a.acc.SetPubKey(pub)
+	panic("unimplemented")
 }
 
 // SetSequence implements std.Account.

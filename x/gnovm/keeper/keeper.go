@@ -8,11 +8,11 @@ import (
 	corestore "cosmossdk.io/core/store"
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/runtime"
 
 	"github.com/ignite/gnovm/x/gnovm/types"
 
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
-	"github.com/gnolang/gno/tm2/pkg/sdk/params"
 )
 
 type Keeper struct {
@@ -34,7 +34,6 @@ type Keeper struct {
 
 func NewKeeper(
 	storeKey *storetypes.KVStoreKey,
-	storeService corestore.KVStoreService,
 	cdc codec.Codec,
 	addressCodec address.Codec,
 	authority []byte,
@@ -45,6 +44,7 @@ func NewKeeper(
 		panic(fmt.Sprintf("invalid authority address %s: %s", authority, err))
 	}
 
+	storeService := runtime.NewKVStoreService(storeKey)
 	sb := collections.NewSchemaBuilder(storeService)
 
 	k := Keeper{
@@ -66,9 +66,9 @@ func NewKeeper(
 	k.VMKeeper = vm.NewVMKeeper(
 		storeKey, // TODO(@julienrbrt): possible use another one.
 		storeKey,
-		NewVMAuthKeeper(k.authKeeper),
-		NewVMBankKeeper(k.bankKeeper),
-		params.ParamsKeeper{},
+		vmAuthKeeper{k.authKeeper, k.bankKeeper},
+		vmBankKeeper{k.bankKeeper},
+		&vmKeeperParams{&k},
 	)
 
 	return k
