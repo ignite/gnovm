@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"context"
-
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 	"github.com/gnolang/gno/tm2/pkg/crypto"
 	gnosdk "github.com/gnolang/gno/tm2/pkg/sdk"
@@ -20,7 +18,7 @@ type vmAuthKeeper struct {
 
 // GetAccount implements vm.AccountKeeperI.
 func (v vmAuthKeeper) GetAccount(ctx gnosdk.Context, addr crypto.Address) std.Account {
-	account := v.authKeeper.GetAccount(context.TODO(), addr.Bytes())
+	account := v.authKeeper.GetAccount(types.SDKContextFromGnoContext(ctx), addr.Bytes())
 	return types.StdAccountFromSDKAccount(account, v.bankKeeper)
 }
 
@@ -36,14 +34,14 @@ func (v vmBankKeeper) AddCoins(ctx gnosdk.Context, addr crypto.Address, amt std.
 
 // GetCoins implements vm.BankKeeperI.
 func (v vmBankKeeper) GetCoins(ctx gnosdk.Context, addr crypto.Address) std.Coins {
-	coins := v.bankKeeper.GetAllBalances(context.TODO(), addr.Bytes())
+	coins := v.bankKeeper.GetAllBalances(types.SDKContextFromGnoContext(ctx), addr.Bytes())
 	return types.StdCoinsFromSDKCoins(coins)
 }
 
 // SendCoins implements vm.BankKeeperI.
 func (v vmBankKeeper) SendCoins(ctx gnosdk.Context, fromAddr crypto.Address, toAddr crypto.Address, amt std.Coins) error {
 	return v.bankKeeper.SendCoins(
-		context.TODO(),
+		types.SDKContextFromGnoContext(ctx),
 		fromAddr.Bytes(),
 		toAddr.Bytes(),
 		types.SDKCoinsFromStdCoins(amt),
