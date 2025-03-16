@@ -67,7 +67,9 @@ message MsgCall {
 }
 
 // MsgCallResponse defines the MsgCallResponse message.
-message MsgCallResponse {}
+message MsgCallResponse {
+  string result = 1;
+}
 
 // MsgRun defines the MsgRun message.
 message MsgRun {
