@@ -20,7 +20,7 @@ require (
 	cosmossdk.io/core v0.11.2
 	cosmossdk.io/depinject v1.1.0
 	cosmossdk.io/errors v1.0.1
-	cosmossdk.io/log v1.5.0
+	cosmossdk.io/log v1.6.1
 	cosmossdk.io/math v1.5.0
 	cosmossdk.io/store v1.1.1
 	cosmossdk.io/tools/confix v0.1.2
@@ -101,8 +101,8 @@ require (
 	github.com/bufbuild/protovalidate-go v0.8.2 // indirect
 	github.com/butuzov/ireturn v0.3.1 // indirect
 	github.com/butuzov/mirror v1.3.0 // indirect
-	github.com/bytedance/sonic v1.12.3 // indirect
-	github.com/bytedance/sonic/loader v0.2.4 // indirect
+	github.com/bytedance/sonic v1.14.0 // indirect
+	github.com/bytedance/sonic/loader v0.3.0 // indirect
 	github.com/catenacyber/perfsprint v0.8.2 // indirect
 	github.com/ccojocar/zxcvbn-go v1.0.2 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
@@ -239,7 +239,7 @@ require (
 	github.com/kisielk/errcheck v1.9.0 // indirect
 	github.com/kkHAIKE/contextcheck v1.1.6 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
-	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -318,7 +318,7 @@ require (
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/rs/cors v1.11.1 // indirect
 	github.com/rs/xid v1.6.0 // indirect
-	github.com/rs/zerolog v1.33.0 // indirect
+	github.com/rs/zerolog v1.34.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/ryancurrah/gomodguard v1.3.5 // indirect
 	github.com/ryanrolds/sqlclosecheck v0.5.1 // indirect
@@ -392,7 +392,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	go.uber.org/zap/exp v0.3.0 // indirect
-	golang.org/x/arch v0.3.0 // indirect
+	golang.org/x/arch v0.17.0 // indirect
 	golang.org/x/crypto v0.40.0 // indirect
 	golang.org/x/exp v0.0.0-20250228200357-dead58393ab7 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20250210185358-939b2ce775ac // indirect
