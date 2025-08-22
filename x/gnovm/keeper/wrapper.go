@@ -51,6 +51,16 @@ func (v vmBankKeeper) SendCoins(ctx gnosdk.Context, fromAddr crypto.Address, toA
 	)
 }
 
+// SendCoinsUnrestricted implements vm.BankKeeperI.
+func (v vmBankKeeper) SendCoinsUnrestricted(ctx gnosdk.Context, fromAddr crypto.Address, toAddr crypto.Address, amt std.Coins) error {
+	return v.bankKeeper.SendCoins(
+		types.SDKContextFromGnoContext(ctx),
+		fromAddr.Bytes(),
+		toAddr.Bytes(),
+		types.SDKCoinsFromStdCoins(amt),
+	)
+}
+
 // SubtractCoins implements vm.BankKeeperI.
 func (v vmBankKeeper) SubtractCoins(ctx gnosdk.Context, addr crypto.Address, amt std.Coins) (std.Coins, error) {
 	panic("unimplemented")
