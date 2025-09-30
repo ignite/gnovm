@@ -13,6 +13,8 @@ import (
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
 
+var _ vm.AccountKeeperI = (*vmAuthKeeper)(nil)
+
 // vmAuthKeeper is a wrapper of the Cosmos SDK auth keeper to the VM expected auth keeper.
 type vmAuthKeeper struct {
 	authKeeper types.AuthKeeper
@@ -25,9 +27,16 @@ func (v vmAuthKeeper) GetAccount(ctx gnosdk.Context, addr crypto.Address) std.Ac
 	return types.StdAccountFromSDKAccount(account, v.bankKeeper)
 }
 
+var _ vm.BankKeeperI = (*vmBankKeeper)(nil)
+
 // vmBankKeeper is a wrapper of the Cosmos SDK bank keeper to the VM expected bank keeper.
 type vmBankKeeper struct {
 	bankKeeper types.BankKeeper
+}
+
+// RestrictedDenoms implements vm.BankKeeperI.
+func (v *vmBankKeeper) RestrictedDenoms(ctx gnosdk.Context) []string {
+	panic("unimplemented")
 }
 
 // AddCoins implements vm.BankKeeperI.
