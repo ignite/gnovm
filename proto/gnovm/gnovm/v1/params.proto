@@ -10,4 +10,7 @@ option go_package = "github.com/ignite/gnovm/x/gnovm/types";
 message Params {
   option (amino.name) = "gnovm/x/gnovm/Params";
   option (gogoproto.equal) = true;
+
+  string sysnames_pkgpath = 1;
+  string chain_domain = 2;
 }

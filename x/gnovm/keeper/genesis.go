@@ -3,12 +3,29 @@ package keeper
 import (
 	"context"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
 
 // InitGenesis initializes the module's state from a provided genesis state.
 func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) error {
-	return k.Params.Set(ctx, genState.Params)
+	if err := k.Params.Set(ctx, genState.Params); err != nil {
+		return err
+	}
+
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	k.VMKeeper.InitGenesis(
+		types.GnoContextFromSDKContext(sdkCtx),
+		vm.GenesisState{
+			Params: vm.Params{ // todo: module params from the module itself and from the vmkeeper must stay in sync
+				SysNamesPkgPath: genState.Params.SysnamesPkgpath,
+				ChainDomain:     genState.Params.ChainDomain,
+			},
+		},
+	)
+
+	return nil
 }
 
 // ExportGenesis returns the module's exported genesis.
@@ -20,6 +37,11 @@ func (k Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) 
 	if err != nil {
 		return nil, err
 	}
+
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	vmGenState := k.VMKeeper.ExportGenesis(types.GnoContextFromSDKContext(sdkCtx))
+	genesis.Params.ChainDomain = vmGenState.Params.ChainDomain
+	genesis.Params.SysnamesPkgpath = vmGenState.Params.SysNamesPkgPath
 
 	return genesis, nil
 }

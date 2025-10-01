@@ -1,17 +1,22 @@
 package types
 
-// NewParams creates a new Params instance.
-func NewParams() Params {
-	return Params{}
-}
+import "github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
-	return NewParams()
+	defaultVmParams := vm.DefaultParams()
+	return Params{
+		SysnamesPkgpath: defaultVmParams.SysNamesPkgPath,
+		ChainDomain:     defaultVmParams.ChainDomain,
+	}
 }
 
 // Validate validates the set of params.
 func (p Params) Validate() error {
+	vmParams := vm.Params{
+		SysNamesPkgPath: p.SysnamesPkgpath,
+		ChainDomain:     p.ChainDomain,
+	}
 
-	return nil
+	return vmParams.Validate()
 }

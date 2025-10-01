@@ -3,9 +3,10 @@ package gnovm
 import (
 	"cosmossdk.io/core/address"
 	"cosmossdk.io/core/appmodule"
-	"cosmossdk.io/core/store"
 	"cosmossdk.io/depinject"
 	"cosmossdk.io/depinject/appconfig"
+	"cosmossdk.io/log"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -28,8 +29,9 @@ func init() {
 type ModuleInputs struct {
 	depinject.In
 
+	Logger       log.Logger
 	Config       *types.Module
-	StoreService store.KVStoreService
+	StoreKey     *storetypes.KVStoreKey
 	Cdc          codec.Codec
 	AddressCodec address.Codec
 
@@ -40,7 +42,7 @@ type ModuleInputs struct {
 type ModuleOutputs struct {
 	depinject.Out
 
-	GnovmKeeper keeper.Keeper
+	GnoVMKeeper keeper.Keeper
 	Module      appmodule.AppModule
 }
 
@@ -51,12 +53,15 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		authority = authtypes.NewModuleAddressOrBech32Address(in.Config.Authority)
 	}
 	k := keeper.NewKeeper(
-		in.StoreService,
+		in.Logger,
+		in.StoreKey,
 		in.Cdc,
 		in.AddressCodec,
 		authority,
+		in.AuthKeeper,
+		in.BankKeeper,
 	)
 	m := NewAppModule(in.Cdc, k, in.AuthKeeper, in.BankKeeper)
 
-	return ModuleOutputs{GnovmKeeper: k, Module: m}
+	return ModuleOutputs{GnoVMKeeper: k, Module: m}
 }

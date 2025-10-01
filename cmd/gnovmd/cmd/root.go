@@ -3,8 +3,6 @@ package cmd
 import (
 	"os"
 
-	"github.com/spf13/cobra"
-
 	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/depinject"
 	"cosmossdk.io/log"
@@ -17,6 +15,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtxconfig "github.com/cosmos/cosmos-sdk/x/auth/tx/config"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/spf13/cobra"
 
 	"github.com/ignite/gnovm/app"
 )
@@ -83,6 +82,8 @@ func NewRootCmd() *cobra.Command {
 	return rootCmd
 }
 
+// ProvideClientContext creates and provides a fully initialized client.Context,
+// allowing it to be used for dependency injection and CLI operations.
 func ProvideClientContext(
 	appCodec codec.Codec,
 	interfaceRegistry codectypes.InterfaceRegistry,

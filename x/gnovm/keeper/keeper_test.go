@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"cosmossdk.io/core/address"
+	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
 	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
-	"github.com/cosmos/cosmos-sdk/runtime"
 	"github.com/cosmos/cosmos-sdk/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
@@ -31,16 +31,18 @@ func initFixture(t *testing.T) *fixture {
 	addressCodec := addresscodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix())
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 
-	storeService := runtime.NewKVStoreService(storeKey)
 	ctx := testutil.DefaultContextWithDB(t, storeKey, storetypes.NewTransientStoreKey("transient_test")).Ctx
 
 	authority := authtypes.NewModuleAddress(types.GovModuleName)
 
 	k := keeper.NewKeeper(
-		storeService,
+		log.NewTestLogger(t),
+		storeKey,
 		encCfg.Codec,
 		addressCodec,
 		authority,
+		nil, /* todo use mock */
+		nil, /* todo use mock*/
 	)
 
 	// Initialize params

@@ -42,7 +42,9 @@ func initRootCmd(
 		snapshot.Cmd(newApp),
 	)
 
-	server.AddCommandsWithStartCmdOptions(rootCmd, app.DefaultNodeHome, newApp, appExport, server.StartCmdOptions{})
+	server.AddCommandsWithStartCmdOptions(rootCmd, app.DefaultNodeHome, newApp, appExport, server.StartCmdOptions{
+		AddFlags: addModuleInitFlags,
+	})
 
 	// add keybase, auxiliary RPC, query, genesis, and tx child commands
 	rootCmd.AddCommand(
@@ -52,6 +54,10 @@ func initRootCmd(
 		txCommand(),
 		keys.Commands(),
 	)
+}
+
+// addModuleInitFlags adds more flags to the start command.
+func addModuleInitFlags(startCmd *cobra.Command) {
 }
 
 func queryCommand() *cobra.Command {

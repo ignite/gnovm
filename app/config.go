@@ -3,7 +3,11 @@ package app
 import sdk "github.com/cosmos/cosmos-sdk/types"
 
 func init() {
-	// Set prefixes
+	// Set bond denom
+
+	sdk.DefaultBondDenom = "stake"
+
+	// Set address prefixes
 	accountPubKeyPrefix := AccountAddressPrefix + "pub"
 	validatorAddressPrefix := AccountAddressPrefix + "valoper"
 	validatorPubKeyPrefix := AccountAddressPrefix + "valoperpub"
@@ -12,6 +16,7 @@ func init() {
 
 	// Set and seal config
 	config := sdk.GetConfig()
+	config.SetCoinType(ChainCoinType)
 	config.SetBech32PrefixForAccount(AccountAddressPrefix, accountPubKeyPrefix)
 	config.SetBech32PrefixForValidator(validatorAddressPrefix, validatorPubKeyPrefix)
 	config.SetBech32PrefixForConsensusNode(consNodeAddressPrefix, consNodePubKeyPrefix)
