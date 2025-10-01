@@ -16,12 +16,9 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	k.VMKeeper.InitGenesis(
-		types.GnoContextFromSDKContext(sdkCtx),
-		vm.GenesisState{
-			Params: vm.Params{ // todo: module params from the module itself and from the vmkeeper must stay in sync
-				SysNamesPkgPath: genState.Params.SysnamesPkgpath,
-				ChainDomain:     genState.Params.ChainDomain,
-			},
+		types.GnoContextFromSDKContext(sdkCtx, k.logger),
+		vm.GenesisState{ // todo: module params from the module itself and from the vmkeeper must stay in sync
+			Params: genState.Params.ToVmParams(),
 		},
 	)
 
@@ -39,7 +36,7 @@ func (k Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) 
 	}
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	vmGenState := k.VMKeeper.ExportGenesis(types.GnoContextFromSDKContext(sdkCtx))
+	vmGenState := k.VMKeeper.ExportGenesis(types.GnoContextFromSDKContext(sdkCtx, k.logger))
 	genesis.Params.ChainDomain = vmGenState.Params.ChainDomain
 	genesis.Params.SysnamesPkgpath = vmGenState.Params.SysNamesPkgPath
 

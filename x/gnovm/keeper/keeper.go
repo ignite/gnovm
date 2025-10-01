@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"log/slog"
 
 	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
@@ -70,12 +71,12 @@ func NewKeeper(
 	k.VMKeeper = vm.NewVMKeeper(
 		storeKey, // TODO(@julienrbrt): possible use another one.
 		storeKey,
-		vmAuthKeeper{k.authKeeper, k.bankKeeper},
-		vmBankKeeper{k.bankKeeper},
+		vmAuthKeeper{k.logger, k.authKeeper, k.bankKeeper},
+		vmBankKeeper{k.logger, k.bankKeeper},
 		&vmKeeperParams{&k},
 	)
 
-	// k.VMKeeper.Initialize(&slog.Logger{}, nil) // TODO
+	k.VMKeeper.Initialize(&slog.Logger{}, nil) // TODO
 
 	return k
 }

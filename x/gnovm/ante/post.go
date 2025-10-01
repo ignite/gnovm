@@ -1,6 +1,7 @@
 package ante
 
 import (
+	"cosmossdk.io/log"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ignite/gnovm/x/gnovm/keeper"
@@ -8,12 +9,13 @@ import (
 )
 
 type GnoTransactionsPost struct {
-	k keeper.Keeper
+	logger log.Logger
+	k      keeper.Keeper
 }
 
 func (gtp GnoTransactionsPost) PostHandle(ctx sdk.Context, tx sdk.Tx, simulate, success bool, next sdk.PostHandler) (newCtx sdk.Context, err error) {
 	if success {
-		gtp.k.CommitGnoTransactionStore(types.GnoContextFromSDKContext(ctx))
+		gtp.k.CommitGnoTransactionStore(types.GnoContextFromSDKContext(ctx, gtp.logger))
 	}
 
 	return next(ctx, tx, simulate, success)

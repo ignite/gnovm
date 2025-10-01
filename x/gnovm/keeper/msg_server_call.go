@@ -16,7 +16,7 @@ func (k msgServer) Call(ctx context.Context, msg *types.MsgCall) (*types.MsgCall
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	res, err := k.VMKeeper.Call(
-		types.GnoContextFromSDKContext(sdkCtx),
+		types.GnoContextFromSDKContext(sdkCtx, k.logger),
 		vm.MsgCall{}, // TODO: Handle the message
 	)
 	if err != nil {

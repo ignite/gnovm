@@ -29,3 +29,16 @@ func (p Params) Validate() error {
 
 	return vmParams.Validate()
 }
+
+// ToVmParams converts the Params to vm.Params.
+func (p Params) ToVmParams() vm.Params {
+	vmParams := vm.Params{
+		SysNamesPkgPath:     p.SysnamesPkgpath,
+		ChainDomain:         p.ChainDomain,
+		DefaultDeposit:      p.DefaultDeposit,
+		StoragePrice:        p.StoragePrice,
+		StorageFeeCollector: crypto.Address(p.StorageFeeCollector),
+	}
+
+	return vmParams
+}

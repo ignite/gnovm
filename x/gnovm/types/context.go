@@ -9,20 +9,20 @@ import (
 	gnosdk "github.com/gnolang/gno/tm2/pkg/sdk"
 )
 
-func GnoContextFromSDKContext(ctx sdk.Context) gnosdk.Context {
+func GnoContextFromSDKContext(ctx sdk.Context, logger log.Logger) gnosdk.Context {
 	runMode := ctx.ExecMode()
 	_ = ctx.MultiStore()
 
 	return gnosdk.NewContext(convertExecMode(runMode), nil, nil /* todo */, slog.Default())
 }
 
-func SDKContextFromGnoContext(ctx gnosdk.Context) sdk.Context {
+func SDKContextFromGnoContext(ctx gnosdk.Context, logger log.Logger) sdk.Context {
 	var isCheckTx bool
 	if ctx.Mode() == gnosdk.RunTxModeCheck {
 		isCheckTx = true
 	}
 
-	return sdk.NewContext(nil, cmtproto.Header{}, isCheckTx, log.NewNopLogger())
+	return sdk.NewContext(nil, cmtproto.Header{}, isCheckTx, logger)
 }
 
 func convertExecMode(execMode sdk.ExecMode) gnosdk.RunTxMode {

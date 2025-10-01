@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"cosmossdk.io/log"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 	"github.com/gnolang/gno/tm2/pkg/crypto"
 	gnosdk "github.com/gnolang/gno/tm2/pkg/sdk"
@@ -17,13 +18,14 @@ var _ vm.AccountKeeperI = (*vmAuthKeeper)(nil)
 
 // vmAuthKeeper is a wrapper of the Cosmos SDK auth keeper to the VM expected auth keeper.
 type vmAuthKeeper struct {
+	logger     log.Logger
 	authKeeper types.AuthKeeper
 	bankKeeper types.BankKeeper
 }
 
 // GetAccount implements vm.AccountKeeperI.
 func (v vmAuthKeeper) GetAccount(ctx gnosdk.Context, addr crypto.Address) std.Account {
-	account := v.authKeeper.GetAccount(types.SDKContextFromGnoContext(ctx), addr.Bytes())
+	account := v.authKeeper.GetAccount(types.SDKContextFromGnoContext(ctx, v.logger), addr.Bytes())
 	return types.StdAccountFromSDKAccount(account, v.bankKeeper)
 }
 
@@ -31,6 +33,7 @@ var _ vm.BankKeeperI = (*vmBankKeeper)(nil)
 
 // vmBankKeeper is a wrapper of the Cosmos SDK bank keeper to the VM expected bank keeper.
 type vmBankKeeper struct {
+	logger     log.Logger
 	bankKeeper types.BankKeeper
 }
 
@@ -46,14 +49,14 @@ func (v vmBankKeeper) AddCoins(ctx gnosdk.Context, addr crypto.Address, amt std.
 
 // GetCoins implements vm.BankKeeperI.
 func (v vmBankKeeper) GetCoins(ctx gnosdk.Context, addr crypto.Address) std.Coins {
-	coins := v.bankKeeper.GetAllBalances(types.SDKContextFromGnoContext(ctx), addr.Bytes())
+	coins := v.bankKeeper.GetAllBalances(types.SDKContextFromGnoContext(ctx, v.logger), addr.Bytes())
 	return types.StdCoinsFromSDKCoins(coins)
 }
 
 // SendCoins implements vm.BankKeeperI.
 func (v vmBankKeeper) SendCoins(ctx gnosdk.Context, fromAddr crypto.Address, toAddr crypto.Address, amt std.Coins) error {
 	return v.bankKeeper.SendCoins(
-		types.SDKContextFromGnoContext(ctx),
+		types.SDKContextFromGnoContext(ctx, v.logger),
 		fromAddr.Bytes(),
 		toAddr.Bytes(),
 		types.SDKCoinsFromStdCoins(amt),
@@ -63,7 +66,7 @@ func (v vmBankKeeper) SendCoins(ctx gnosdk.Context, fromAddr crypto.Address, toA
 // SendCoinsUnrestricted implements vm.BankKeeperI.
 func (v vmBankKeeper) SendCoinsUnrestricted(ctx gnosdk.Context, fromAddr crypto.Address, toAddr crypto.Address, amt std.Coins) error {
 	return v.bankKeeper.SendCoins(
-		types.SDKContextFromGnoContext(ctx),
+		types.SDKContextFromGnoContext(ctx, v.logger),
 		fromAddr.Bytes(),
 		toAddr.Bytes(),
 		types.SDKCoinsFromStdCoins(amt),
@@ -161,7 +164,7 @@ func (k *vmKeeperParams) GetInt64(ctx gnosdk.Context, key string, ptr *int64) {
 
 // GetRaw implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) GetRaw(ctx gnosdk.Context, key string) []byte {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
+	sdkCtx := types.SDKContextFromGnoContext(ctx, k.k.logger)
 
 	// use store service to get the value
 	store := k.k.storeService.OpenKVStore(sdkCtx)
@@ -257,7 +260,7 @@ func (k *vmKeeperParams) GetUint64(ctx gnosdk.Context, key string, ptr *uint64) 
 
 // Has implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) Has(ctx gnosdk.Context, key string) bool {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
+	sdkCtx := types.SDKContextFromGnoContext(ctx, k.k.logger)
 
 	// use store service to check if the key exists
 	store := k.k.storeService.OpenKVStore(sdkCtx)
@@ -319,7 +322,7 @@ func (k *vmKeeperParams) SetInt64(ctx gnosdk.Context, key string, value int64) {
 
 // SetRaw implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) SetRaw(ctx gnosdk.Context, key string, value []byte) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
+	sdkCtx := types.SDKContextFromGnoContext(ctx, k.k.logger)
 
 	// use store service to set the value
 	store := k.k.storeService.OpenKVStore(sdkCtx)
