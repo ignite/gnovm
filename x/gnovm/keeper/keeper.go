@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"fmt"
-	"log/slog"
 
 	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
@@ -76,7 +75,7 @@ func NewKeeper(
 		&vmKeeperParams{&k},
 	)
 
-	k.VMKeeper.Initialize(&slog.Logger{}, nil) // TODO
+	k.VMKeeper.Initialize(types.NewSlogFromCosmosLogger(k.logger), nil)
 
 	return k
 }

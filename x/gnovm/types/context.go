@@ -1,8 +1,6 @@
 package types
 
 import (
-	"log/slog"
-
 	"cosmossdk.io/log"
 	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -13,7 +11,7 @@ func GnoContextFromSDKContext(ctx sdk.Context, logger log.Logger) gnosdk.Context
 	runMode := ctx.ExecMode()
 	_ = ctx.MultiStore()
 
-	return gnosdk.NewContext(convertExecMode(runMode), nil, nil /* todo */, slog.Default())
+	return gnosdk.NewContext(convertExecMode(runMode), nil, nil /* todo */, NewSlogFromCosmosLogger(logger))
 }
 
 func SDKContextFromGnoContext(ctx gnosdk.Context, logger log.Logger) sdk.Context {
