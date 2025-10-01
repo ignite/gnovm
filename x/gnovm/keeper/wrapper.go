@@ -35,8 +35,8 @@ type vmBankKeeper struct {
 }
 
 // RestrictedDenoms implements vm.BankKeeperI.
-func (v *vmBankKeeper) RestrictedDenoms(ctx gnosdk.Context) []string {
-	panic("unimplemented")
+func (v vmBankKeeper) RestrictedDenoms(ctx gnosdk.Context) []string {
+	return []string{}
 }
 
 // AddCoins implements vm.BankKeeperI.
@@ -88,8 +88,6 @@ func (k *vmKeeperParams) paramStoreKey(key string) string {
 
 // GetAny implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) GetAny(ctx gnosdk.Context, key string) interface{} {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// get raw value from the store
 	data := k.GetRaw(ctx, key)
 	if len(data) == 0 {
@@ -109,8 +107,6 @@ func (k *vmKeeperParams) GetAny(ctx gnosdk.Context, key string) interface{} {
 
 // GetBool implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) GetBool(ctx gnosdk.Context, key string, ptr *bool) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// get raw value from the store
 	data := k.GetRaw(ctx, key)
 	if len(data) == 0 {
@@ -132,8 +128,6 @@ func (k *vmKeeperParams) GetBool(ctx gnosdk.Context, key string, ptr *bool) {
 
 // GetBytes implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) GetBytes(ctx gnosdk.Context, key string, ptr *[]byte) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// get raw value from the store
 	data := k.GetRaw(ctx, key)
 	if len(data) == 0 {
@@ -146,8 +140,6 @@ func (k *vmKeeperParams) GetBytes(ctx gnosdk.Context, key string, ptr *[]byte) {
 
 // GetInt64 implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) GetInt64(ctx gnosdk.Context, key string, ptr *int64) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// get raw value from the store
 	data := k.GetRaw(ctx, key)
 	if len(data) == 0 {
@@ -186,8 +178,6 @@ func (k *vmKeeperParams) GetRaw(ctx gnosdk.Context, key string) []byte {
 
 // GetString implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) GetString(ctx gnosdk.Context, key string, ptr *string) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// get raw value from the store
 	data := k.GetRaw(ctx, key)
 	if len(data) == 0 {
@@ -209,8 +199,6 @@ func (k *vmKeeperParams) GetString(ctx gnosdk.Context, key string, ptr *string) 
 
 // GetStrings implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) GetStrings(ctx gnosdk.Context, key string, ptr *[]string) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// get raw value from the store
 	data := k.GetRaw(ctx, key)
 	if len(data) == 0 {
@@ -232,8 +220,6 @@ func (k *vmKeeperParams) GetStrings(ctx gnosdk.Context, key string, ptr *[]strin
 
 // GetStruct implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) GetStruct(ctx gnosdk.Context, key string, strctPtr interface{}) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// get raw value from the store
 	data := k.GetRaw(ctx, key)
 	if len(data) == 0 {
@@ -250,8 +236,6 @@ func (k *vmKeeperParams) GetStruct(ctx gnosdk.Context, key string, strctPtr inte
 
 // GetUint64 implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) GetUint64(ctx gnosdk.Context, key string, ptr *uint64) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// get raw value from the store
 	data := k.GetRaw(ctx, key)
 	if len(data) == 0 {
@@ -290,8 +274,6 @@ func (k *vmKeeperParams) Has(ctx gnosdk.Context, key string) bool {
 
 // SetAny implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) SetAny(ctx gnosdk.Context, key string, value interface{}) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// marshal the value
 	data, err := json.Marshal(value)
 	if err != nil {
@@ -305,8 +287,6 @@ func (k *vmKeeperParams) SetAny(ctx gnosdk.Context, key string, value interface{
 
 // SetBool implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) SetBool(ctx gnosdk.Context, key string, value bool) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// marshal the value
 	data, err := json.Marshal(value)
 	if err != nil {
@@ -320,16 +300,12 @@ func (k *vmKeeperParams) SetBool(ctx gnosdk.Context, key string, value bool) {
 
 // SetBytes implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) SetBytes(ctx gnosdk.Context, key string, value []byte) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// directly use the raw bytes
 	k.SetRaw(ctx, key, value)
 }
 
 // SetInt64 implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) SetInt64(ctx gnosdk.Context, key string, value int64) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// marshal the value
 	data, err := json.Marshal(value)
 	if err != nil {
@@ -356,8 +332,6 @@ func (k *vmKeeperParams) SetRaw(ctx gnosdk.Context, key string, value []byte) {
 
 // SetString implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) SetString(ctx gnosdk.Context, key string, value string) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// marshal the value
 	data, err := json.Marshal(value)
 	if err != nil {
@@ -371,8 +345,6 @@ func (k *vmKeeperParams) SetString(ctx gnosdk.Context, key string, value string)
 
 // SetStrings implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) SetStrings(ctx gnosdk.Context, key string, value []string) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// marshal the value
 	data, err := json.Marshal(value)
 	if err != nil {
@@ -386,8 +358,6 @@ func (k *vmKeeperParams) SetStrings(ctx gnosdk.Context, key string, value []stri
 
 // SetStruct implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) SetStruct(ctx gnosdk.Context, key string, strct interface{}) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// marshal the value
 	data, err := json.Marshal(strct)
 	if err != nil {
@@ -401,8 +371,6 @@ func (k *vmKeeperParams) SetStruct(ctx gnosdk.Context, key string, strct interfa
 
 // SetUint64 implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) SetUint64(ctx gnosdk.Context, key string, value uint64) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx)
-
 	// marshal the value
 	data, err := json.Marshal(value)
 	if err != nil {
