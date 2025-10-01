@@ -2,11 +2,9 @@ package types
 
 // DONTCOVER
 
-import (
-	"cosmossdk.io/errors"
-)
+import "cosmossdk.io/errors"
 
-// x/gnovm module sentinel errors
+// x/gnovm module errors
 var (
 	ErrInvalidSigner = errors.Register(ModuleName, 1100, "expected gov account as only signer for proposal message")
 )

@@ -13,4 +13,7 @@ message Params {
 
   string sysnames_pkgpath = 1;
   string chain_domain = 2;
+  string default_deposit = 3;
+  string storage_price = 4;
+  bytes storage_fee_collector = 5;
 }

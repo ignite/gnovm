@@ -14,17 +14,17 @@ option go_package = "github.com/ignite/gnovm/x/gnovm/types";
 // Msg defines the Msg service.
 service Msg {
   option (cosmos.msg.v1.service) = true;
-  
+
   // UpdateParams defines a (governance) operation for updating the module
   // parameters. The authority defaults to the x/gov module account.
   rpc UpdateParams (MsgUpdateParams) returns (MsgUpdateParamsResponse);
-  
+
   // AddPackage defines the AddPackage RPC.
   rpc AddPackage (MsgAddPackage) returns (MsgAddPackageResponse);
-  
+
   // Call defines the Call RPC.
   rpc Call (MsgCall) returns (MsgCallResponse);
-  
+
   // Run defines the Run RPC.
   rpc Run (MsgRun) returns (MsgRunResponse);
 }
@@ -32,12 +32,12 @@ service Msg {
 message MsgUpdateParams {
   option (cosmos.msg.v1.signer) =                     "authority";
   option           (amino.name) = "gnovm/x/gnovm/MsgUpdateParams";
-  
+
   // authority is the address that controls the module (defaults to x/gov unless overwritten).
   string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 
   // params defines the module parameters to update.
-  
+
   // NOTE: All parameters must be supplied.
   Params params = 2 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
 }
@@ -51,6 +51,8 @@ message MsgAddPackage {
   option (cosmos.msg.v1.signer) = "creator";
   string                   creator = 1;
   repeated cosmos.base.v1beta1.Coin deposit = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin max_deposit = 3 [(gogoproto.nullable) = false];
+  bytes package = 4;
 }
 
 // MsgAddPackageResponse defines the MsgAddPackageResponse message.
@@ -61,9 +63,10 @@ message MsgCall {
   option (cosmos.msg.v1.signer) = "caller";
   string                   caller   = 1;
   repeated cosmos.base.v1beta1.Coin send     = 2 [(gogoproto.nullable) = false];
-  string                   pkg_path = 3;
-  string                   function = 4;
-  repeated string                   args     = 5;
+  cosmos.base.v1beta1.Coin max_deposit = 3 [(gogoproto.nullable) = false];
+  string                   pkg_path = 4;
+  string                   function = 5;
+  repeated string                   args     = 6;
 }
 
 // MsgCallResponse defines the MsgCallResponse message.
@@ -76,9 +79,9 @@ message MsgRun {
   option (cosmos.msg.v1.signer) = "caller";
   string                   caller  = 1;
   repeated cosmos.base.v1beta1.Coin send    = 2 [(gogoproto.nullable) = false];
-  bytes                    pkg     = 3;
+  cosmos.base.v1beta1.Coin max_deposit = 3 [(gogoproto.nullable) = false];
+  bytes                    pkg     = 4;
 }
 
 // MsgRunResponse defines the MsgRunResponse message.
 message MsgRunResponse {}
-
