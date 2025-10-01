@@ -32,8 +32,12 @@ import (
 )
 
 const (
+	// Name is the name of the application.
+	Name = "gnovm"
+	// AccountAddressPrefix is the prefix for accounts addresses.
 	AccountAddressPrefix = "cosmos"
-	Name                 = "gnovm"
+	// ChainCoinType is the coin type of the chain.
+	ChainCoinType = 118
 )
 
 // DefaultNodeHome default home directories for the application daemon
@@ -59,9 +63,7 @@ type App struct {
 	BankKeeper    bankkeeper.Keeper
 	StakingKeeper *stakingkeeper.Keeper
 	DistrKeeper   distrkeeper.Keeper
-
-	GnovmKeeper gnovmmodulekeeper.Keeper
-	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
+	GnovmKeeper   gnovmmodulekeeper.Keeper
 
 	// simulation manager
 	sm *module.SimulationManager

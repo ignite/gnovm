@@ -1,5 +1,6 @@
 version: 1
 validation: sovereign
+default_denom: stake
 accounts: 
 - name: alice
   coins:
@@ -11,7 +12,7 @@ accounts:
   - 100000000stake
 client:
   openapi:
-    path: docs/static/openapi.yml
+    path: docs/static/openapi.json
 faucet:
   name: bob
   coins:
@@ -21,8 +22,6 @@ validators:
 - name: alice
   bonded: 100000000stake
 - name: validator1
-  bonded: 100000000stake
-- name: validator2
   bonded: 200000000stake
-- name: validator3
-  bonded: 300000000stake
+- name: validator2
+  bonded: 100000000stake
