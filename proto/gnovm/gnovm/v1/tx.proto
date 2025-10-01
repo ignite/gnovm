@@ -3,11 +3,11 @@ syntax = "proto3";
 package gnovm.gnovm.v1;
 
 import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
 import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
-import "gogoproto/gogo.proto";
 import "gnovm/gnovm/v1/params.proto";
-import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
 
 option go_package = "github.com/ignite/gnovm/x/gnovm/types";
 
@@ -17,39 +17,41 @@ service Msg {
 
   // UpdateParams defines a (governance) operation for updating the module
   // parameters. The authority defaults to the x/gov module account.
-  rpc UpdateParams (MsgUpdateParams) returns (MsgUpdateParamsResponse);
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
 
   // AddPackage defines the AddPackage RPC.
-  rpc AddPackage (MsgAddPackage) returns (MsgAddPackageResponse);
+  rpc AddPackage(MsgAddPackage) returns (MsgAddPackageResponse);
 
   // Call defines the Call RPC.
-  rpc Call (MsgCall) returns (MsgCallResponse);
+  rpc Call(MsgCall) returns (MsgCallResponse);
 
   // Run defines the Run RPC.
-  rpc Run (MsgRun) returns (MsgRunResponse);
+  rpc Run(MsgRun) returns (MsgRunResponse);
 }
+
 // MsgUpdateParams is the Msg/UpdateParams request type.
 message MsgUpdateParams {
-  option (cosmos.msg.v1.signer) =                     "authority";
-  option           (amino.name) = "gnovm/x/gnovm/MsgUpdateParams";
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "gnovm/x/gnovm/MsgUpdateParams";
 
   // authority is the address that controls the module (defaults to x/gov unless overwritten).
   string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 
   // params defines the module parameters to update.
-
   // NOTE: All parameters must be supplied.
-  Params params = 2 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  Params params = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
 }
 
-// MsgUpdateParamsResponse defines the response structure for executing a
-// MsgUpdateParams message.
+// MsgUpdateParamsResponse defines the response structure for executing a MsgUpdateParams message.
 message MsgUpdateParamsResponse {}
 
 // MsgAddPackage defines the MsgAddPackage message.
 message MsgAddPackage {
   option (cosmos.msg.v1.signer) = "creator";
-  string                   creator = 1;
+  string creator = 1;
   repeated cosmos.base.v1beta1.Coin deposit = 2 [(gogoproto.nullable) = false];
   cosmos.base.v1beta1.Coin max_deposit = 3 [(gogoproto.nullable) = false];
   bytes package = 4;
@@ -61,12 +63,12 @@ message MsgAddPackageResponse {}
 // MsgCall defines the MsgCall message.
 message MsgCall {
   option (cosmos.msg.v1.signer) = "caller";
-  string                   caller   = 1;
-  repeated cosmos.base.v1beta1.Coin send     = 2 [(gogoproto.nullable) = false];
+  string caller = 1;
+  repeated cosmos.base.v1beta1.Coin send = 2 [(gogoproto.nullable) = false];
   cosmos.base.v1beta1.Coin max_deposit = 3 [(gogoproto.nullable) = false];
-  string                   pkg_path = 4;
-  string                   function = 5;
-  repeated string                   args     = 6;
+  string pkg_path = 4;
+  string function = 5;
+  repeated string args = 6;
 }
 
 // MsgCallResponse defines the MsgCallResponse message.
@@ -77,10 +79,10 @@ message MsgCallResponse {
 // MsgRun defines the MsgRun message.
 message MsgRun {
   option (cosmos.msg.v1.signer) = "caller";
-  string                   caller  = 1;
-  repeated cosmos.base.v1beta1.Coin send    = 2 [(gogoproto.nullable) = false];
+  string caller = 1;
+  repeated cosmos.base.v1beta1.Coin send = 2 [(gogoproto.nullable) = false];
   cosmos.base.v1beta1.Coin max_deposit = 3 [(gogoproto.nullable) = false];
-  bytes                    pkg     = 4;
+  bytes pkg = 4;
 }
 
 // MsgRunResponse defines the MsgRunResponse message.
