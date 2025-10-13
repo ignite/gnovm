@@ -22,11 +22,13 @@ type vmAuthKeeper struct {
 	logger     log.Logger
 	authKeeper types.AuthKeeper
 	bankKeeper types.BankKeeper
+
+	vmParams *vmKeeperParams
 }
 
 // GetAccount implements vm.AccountKeeperI.
 func (v vmAuthKeeper) GetAccount(ctx gnosdk.Context, addr crypto.Address) std.Account {
-	account := v.authKeeper.GetAccount(types.SDKContextFromGnoContext(ctx, v.logger), addr.Bytes())
+	account := v.authKeeper.GetAccount(v.vmParams.sdkCtx, addr.Bytes())
 	return types.StdAccountFromSDKAccount(account, v.bankKeeper)
 }
 
@@ -36,6 +38,8 @@ var _ vm.BankKeeperI = (*vmBankKeeper)(nil)
 type vmBankKeeper struct {
 	logger     log.Logger
 	bankKeeper types.BankKeeper
+
+	vmParams *vmKeeperParams
 }
 
 // RestrictedDenoms implements vm.BankKeeperI.
@@ -50,14 +54,14 @@ func (v vmBankKeeper) AddCoins(ctx gnosdk.Context, addr crypto.Address, amt std.
 
 // GetCoins implements vm.BankKeeperI.
 func (v vmBankKeeper) GetCoins(ctx gnosdk.Context, addr crypto.Address) std.Coins {
-	coins := v.bankKeeper.GetAllBalances(types.SDKContextFromGnoContext(ctx, v.logger), addr.Bytes())
+	coins := v.bankKeeper.GetAllBalances(v.vmParams.sdkCtx, addr.Bytes())
 	return types.StdCoinsFromSDKCoins(coins)
 }
 
 // SendCoins implements vm.BankKeeperI.
 func (v vmBankKeeper) SendCoins(ctx gnosdk.Context, fromAddr crypto.Address, toAddr crypto.Address, amt std.Coins) error {
 	return v.bankKeeper.SendCoins(
-		types.SDKContextFromGnoContext(ctx, v.logger),
+		v.vmParams.sdkCtx,
 		fromAddr.Bytes(),
 		toAddr.Bytes(),
 		types.SDKCoinsFromStdCoins(amt),
@@ -67,7 +71,7 @@ func (v vmBankKeeper) SendCoins(ctx gnosdk.Context, fromAddr crypto.Address, toA
 // SendCoinsUnrestricted implements vm.BankKeeperI.
 func (v vmBankKeeper) SendCoinsUnrestricted(ctx gnosdk.Context, fromAddr crypto.Address, toAddr crypto.Address, amt std.Coins) error {
 	return v.bankKeeper.SendCoins(
-		types.SDKContextFromGnoContext(ctx, v.logger),
+		v.vmParams.sdkCtx,
 		fromAddr.Bytes(),
 		toAddr.Bytes(),
 		types.SDKCoinsFromStdCoins(amt),

@@ -92,8 +92,8 @@ func NewKeeper(
 	k.VMKeeper = vm.NewVMKeeper(
 		storeKey,
 		memStoreKey,
-		vmAuthKeeper{k.logger, k.authKeeper, k.bankKeeper},
-		vmBankKeeper{k.logger, k.bankKeeper},
+		vmAuthKeeper{k.logger, k.authKeeper, k.bankKeeper, k.vmParams},
+		vmBankKeeper{k.logger, k.bankKeeper, k.vmParams},
 		k.vmParams,
 	)
 

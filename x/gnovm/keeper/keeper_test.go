@@ -35,7 +35,6 @@ func initFixture(t *testing.T) *fixture {
 	tKey := storetypes.NewTransientStoreKey("transient_test")
 	sdkCtx := testutil.DefaultContextWithDB(t, storeKey, tKey).Ctx
 	sdkCtx = sdkCtx.WithChainID("gnovm-test")
-	ctx := sdk.WrapSDKContext(sdkCtx)
 
 	authority := authtypes.NewModuleAddress(types.GovModuleName)
 
@@ -51,12 +50,12 @@ func initFixture(t *testing.T) *fixture {
 	)
 
 	// Initialize params
-	if err := k.Params.Set(ctx, types.DefaultParams()); err != nil {
+	if err := k.Params.Set(sdkCtx, types.DefaultParams()); err != nil {
 		t.Fatalf("failed to set params: %v", err)
 	}
 
 	return &fixture{
-		ctx:          ctx,
+		ctx:          sdkCtx,
 		keeper:       k,
 		addressCodec: addressCodec,
 	}

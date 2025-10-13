@@ -2,7 +2,6 @@ package types
 
 import (
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
-	"github.com/gnolang/gno/tm2/pkg/crypto"
 )
 
 // DefaultParams returns the default set of parameters.
@@ -24,7 +23,7 @@ func (p Params) Validate() error {
 		ChainDomain:         p.ChainDomain,
 		DefaultDeposit:      p.DefaultDeposit,
 		StoragePrice:        p.StoragePrice,
-		StorageFeeCollector: toCryptoAddress(p.StorageFeeCollector),
+		StorageFeeCollector: ToCryptoAddress(p.StorageFeeCollector),
 	}
 
 	return vmParams.Validate()
@@ -37,18 +36,8 @@ func (p Params) ToVmParams() vm.Params {
 		ChainDomain:         p.ChainDomain,
 		DefaultDeposit:      p.DefaultDeposit,
 		StoragePrice:        p.StoragePrice,
-		StorageFeeCollector: toCryptoAddress(p.StorageFeeCollector),
+		StorageFeeCollector: ToCryptoAddress(p.StorageFeeCollector),
 	}
 
 	return vmParams
-}
-
-// toCryptoAddress converts a byte slice to crypto.Address safely.
-// If the input length is not 20 bytes, it returns the zero address.
-func toCryptoAddress(b []byte) crypto.Address {
-	var addr crypto.Address
-	if len(b) == len(addr) {
-		copy(addr[:], b)
-	}
-	return addr
 }
