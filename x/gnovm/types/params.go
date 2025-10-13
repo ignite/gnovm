@@ -24,7 +24,7 @@ func (p Params) Validate() error {
 		ChainDomain:         p.ChainDomain,
 		DefaultDeposit:      p.DefaultDeposit,
 		StoragePrice:        p.StoragePrice,
-		StorageFeeCollector: crypto.Address(p.StorageFeeCollector),
+		StorageFeeCollector: toCryptoAddress(p.StorageFeeCollector),
 	}
 
 	return vmParams.Validate()
@@ -37,8 +37,18 @@ func (p Params) ToVmParams() vm.Params {
 		ChainDomain:         p.ChainDomain,
 		DefaultDeposit:      p.DefaultDeposit,
 		StoragePrice:        p.StoragePrice,
-		StorageFeeCollector: crypto.Address(p.StorageFeeCollector),
+		StorageFeeCollector: toCryptoAddress(p.StorageFeeCollector),
 	}
 
 	return vmParams
+}
+
+// toCryptoAddress converts a byte slice to crypto.Address safely.
+// If the input length is not 20 bytes, it returns the zero address.
+func toCryptoAddress(b []byte) crypto.Address {
+	var addr crypto.Address
+	if len(b) == len(addr) {
+		copy(addr[:], b)
+	}
+	return addr
 }

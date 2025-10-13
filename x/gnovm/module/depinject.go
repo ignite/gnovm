@@ -32,6 +32,7 @@ type ModuleInputs struct {
 	Logger       log.Logger
 	Config       *types.Module
 	StoreKey     *storetypes.KVStoreKey
+	MemStoreKey  *storetypes.MemoryStoreKey
 	Cdc          codec.Codec
 	AddressCodec address.Codec
 
@@ -55,6 +56,7 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 	k := keeper.NewKeeper(
 		in.Logger,
 		in.StoreKey,
+		in.MemStoreKey,
 		in.Cdc,
 		in.AddressCodec,
 		authority,

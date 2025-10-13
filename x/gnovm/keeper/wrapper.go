@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"cosmossdk.io/log"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 	"github.com/gnolang/gno/tm2/pkg/crypto"
 	gnosdk "github.com/gnolang/gno/tm2/pkg/sdk"
@@ -81,7 +82,13 @@ func (v vmBankKeeper) SubtractCoins(ctx gnosdk.Context, addr crypto.Address, amt
 var _ vm.ParamsKeeperI = (*vmKeeperParams)(nil)
 
 type vmKeeperParams struct {
-	k *Keeper
+	k      *Keeper
+	sdkCtx sdk.Context
+}
+
+// SetSDKContext sets the SDK context for store operations
+func (k *vmKeeperParams) SetSDKContext(ctx sdk.Context) {
+	k.sdkCtx = ctx
 }
 
 // paramStoreKey generates the store key for a given parameter
@@ -164,10 +171,8 @@ func (k *vmKeeperParams) GetInt64(ctx gnosdk.Context, key string, ptr *int64) {
 
 // GetRaw implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) GetRaw(ctx gnosdk.Context, key string) []byte {
-	sdkCtx := types.SDKContextFromGnoContext(ctx, k.k.logger)
-
 	// use store service to get the value
-	store := k.k.storeService.OpenKVStore(sdkCtx)
+	store := k.k.storeService.OpenKVStore(k.sdkCtx)
 	storeKey := []byte(k.paramStoreKey(key))
 
 	data, err := store.Get(storeKey)
@@ -260,10 +265,8 @@ func (k *vmKeeperParams) GetUint64(ctx gnosdk.Context, key string, ptr *uint64) 
 
 // Has implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) Has(ctx gnosdk.Context, key string) bool {
-	sdkCtx := types.SDKContextFromGnoContext(ctx, k.k.logger)
-
 	// use store service to check if the key exists
-	store := k.k.storeService.OpenKVStore(sdkCtx)
+	store := k.k.storeService.OpenKVStore(k.sdkCtx)
 	storeKey := []byte(k.paramStoreKey(key))
 
 	has, err := store.Has(storeKey)
@@ -322,10 +325,8 @@ func (k *vmKeeperParams) SetInt64(ctx gnosdk.Context, key string, value int64) {
 
 // SetRaw implements vm.ParamsKeeperI.
 func (k *vmKeeperParams) SetRaw(ctx gnosdk.Context, key string, value []byte) {
-	sdkCtx := types.SDKContextFromGnoContext(ctx, k.k.logger)
-
 	// use store service to set the value
-	store := k.k.storeService.OpenKVStore(sdkCtx)
+	store := k.k.storeService.OpenKVStore(k.sdkCtx)
 	storeKey := []byte(k.paramStoreKey(key))
 
 	if err := store.Set(storeKey, value); err != nil {

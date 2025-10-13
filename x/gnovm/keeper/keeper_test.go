@@ -29,15 +29,20 @@ func initFixture(t *testing.T) *fixture {
 
 	encCfg := moduletestutil.MakeTestEncodingConfig(module.AppModule{})
 	addressCodec := addresscodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix())
-	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
+	storeKey := storetypes.NewKVStoreKey("gnovm")
+	memStoreKey := storetypes.NewMemoryStoreKey("memory:gnovm")
 
-	ctx := testutil.DefaultContextWithDB(t, storeKey, storetypes.NewTransientStoreKey("transient_test")).Ctx
+	tKey := storetypes.NewTransientStoreKey("transient_test")
+	sdkCtx := testutil.DefaultContextWithDB(t, storeKey, tKey).Ctx
+	sdkCtx = sdkCtx.WithChainID("gnovm-test")
+	ctx := sdk.WrapSDKContext(sdkCtx)
 
 	authority := authtypes.NewModuleAddress(types.GovModuleName)
 
 	k := keeper.NewKeeper(
 		log.NewTestLogger(t),
 		storeKey,
+		memStoreKey,
 		encCfg.Codec,
 		addressCodec,
 		authority,

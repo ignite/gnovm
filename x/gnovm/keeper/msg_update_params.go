@@ -20,6 +20,15 @@ func (k msgServer) UpdateParams(ctx context.Context, req *types.MsgUpdateParams)
 		return nil, errorsmod.Wrapf(types.ErrInvalidSigner, "invalid authority; expected %s, got %s", expectedAuthorityStr, req.Authority)
 	}
 
+	// Treat zero-valued params as no-op (skip validation and update)
+	if req.Params.SysnamesPkgpath == "" &&
+		req.Params.ChainDomain == "" &&
+		req.Params.DefaultDeposit == "" &&
+		req.Params.StoragePrice == "" &&
+		len(req.Params.StorageFeeCollector) == 0 {
+		return &types.MsgUpdateParamsResponse{}, nil
+	}
+
 	if err := req.Params.Validate(); err != nil {
 		return nil, err
 	}
