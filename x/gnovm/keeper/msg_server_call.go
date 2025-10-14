@@ -2,12 +2,11 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
-	bft "github.com/gnolang/gno/tm2/pkg/bft/types"
-	gnosdk "github.com/gnolang/gno/tm2/pkg/sdk"
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
 
@@ -18,16 +17,12 @@ func (k msgServer) Call(ctx context.Context, msg *types.MsgCall) (*types.MsgCall
 	}
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	if err := (&k).initializeVMKeeper(sdkCtx); err != nil {
+
+	gnoCtx, err := k.BuildGnoContextWithStore(sdkCtx)
+	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to initialize VM")
 	}
-
-	gnoCtx := gnosdk.NewContext(
-		gnosdk.RunTxModeDeliver,
-		nil, // MultiStore provided by our wrapper
-		&bft.Header{ChainID: sdkCtx.ChainID()},
-		types.NewSlogFromCosmosLogger(k.logger),
-	)
+	defer k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
 
 	vmMsg := vm.MsgCall{
 		Caller:     types.ToCryptoAddress(callerBytes),
@@ -38,15 +33,24 @@ func (k msgServer) Call(ctx context.Context, msg *types.MsgCall) (*types.MsgCall
 		Args:       msg.Args,
 	}
 
-	res, err := k.VMKeeper.Call(
-		gnoCtx,
-		vmMsg,
-	)
-	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to call VM")
+	var result string
+	var callErr error
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				callErr = fmt.Errorf("panic while calling VM: %v", r)
+			}
+		}()
+		result, callErr = k.VMKeeper.Call(
+			gnoCtx,
+			vmMsg,
+		)
+	}()
+	if callErr != nil {
+		return nil, errorsmod.Wrap(callErr, "failed to call VM")
 	}
 
 	return &types.MsgCallResponse{
-		Result: res,
+		Result: result,
 	}, nil
 }

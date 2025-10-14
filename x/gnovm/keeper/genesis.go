@@ -6,8 +6,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
-	bft "github.com/gnolang/gno/tm2/pkg/bft/types"
-	gnosdk "github.com/gnolang/gno/tm2/pkg/sdk"
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
 
@@ -18,22 +16,23 @@ func (k *Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) e
 	}
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	if err := k.initializeVMKeeper(sdkCtx); err != nil {
-		return err
-	}
 
 	chainID := sdkCtx.ChainID()
 	if chainID == "" {
 		return errors.New("chainID is empty")
 	}
 
+	// Ensure VMKeeper is initialized before using it
+	if err := k.initializeVMKeeper(sdkCtx); err != nil {
+		return err
+	}
+
 	// Create a safe gno context for genesis operations
-	gnoCtx := gnosdk.NewContext(
-		gnosdk.RunTxModeDeliver,
-		nil, // multistore - VMKeeper will use our wrapper
-		&bft.Header{ChainID: chainID},
-		types.NewSlogFromCosmosLogger(k.logger),
-	)
+	gnoCtx, err := k.BuildGnoContextWithStore(sdkCtx)
+	if err != nil {
+		return err
+	}
+	defer k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
 
 	// todo: module params from the module itself and from the vmkeeper must stay in sync
 	k.VMKeeper.InitGenesis(
@@ -57,22 +56,23 @@ func (k *Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error)
 	}
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	if err := k.initializeVMKeeper(sdkCtx); err != nil {
-		return nil, err
-	}
 
 	chainID := sdkCtx.ChainID()
 	if chainID == "" {
 		return nil, errors.New("chainID is empty")
 	}
 
+	// Ensure VMKeeper is initialized before using it
+	if err := k.initializeVMKeeper(sdkCtx); err != nil {
+		return nil, err
+	}
+
 	// Create a safe gno context for genesis operations
-	gnoCtx := gnosdk.NewContext(
-		gnosdk.RunTxModeDeliver,
-		nil, // multistore - VMKeeper will use our wrapper
-		&bft.Header{ChainID: chainID},
-		types.NewSlogFromCosmosLogger(k.logger),
-	)
+	gnoCtx, err := k.BuildGnoContextWithStore(sdkCtx)
+	if err != nil {
+		return nil, err
+	}
+	defer k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
 
 	vmGenState := k.VMKeeper.ExportGenesis(gnoCtx)
 	genesis.Params.ChainDomain = vmGenState.Params.ChainDomain

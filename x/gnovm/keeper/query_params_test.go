@@ -12,11 +12,11 @@ import (
 func TestParamsQuery(t *testing.T) {
 	f := initFixture(t)
 
-	qs := keeper.NewQueryServerImpl(f.keeper)
+	q := keeper.NewQueryServerImpl(&f.keeper)
 	params := types.DefaultParams()
 	require.NoError(t, f.keeper.Params.Set(f.ctx, params))
 
-	response, err := qs.Params(f.ctx, &types.QueryParamsRequest{})
+	response, err := q.Params(f.ctx, &types.QueryParamsRequest{})
 	require.NoError(t, err)
 	require.Equal(t, &types.QueryParamsResponse{Params: params}, response)
 }

@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"cosmossdk.io/core/address"
@@ -22,6 +23,75 @@ type fixture struct {
 	ctx          context.Context
 	keeper       keeper.Keeper
 	addressCodec address.Codec
+}
+
+// mockAuthKeeper implements types.AuthKeeper for tests.
+type mockAuthKeeper struct {
+	accounts map[string]sdk.AccountI
+}
+
+func newMockAuthKeeper() *mockAuthKeeper {
+	return &mockAuthKeeper{accounts: make(map[string]sdk.AccountI)}
+}
+
+func (m *mockAuthKeeper) GetAccount(_ context.Context, addr sdk.AccAddress) sdk.AccountI {
+	key := addr.String()
+	if acc, ok := m.accounts[key]; ok {
+		return acc
+	}
+	acc := authtypes.NewBaseAccountWithAddress(addr)
+	m.accounts[key] = acc
+	return acc
+}
+
+// mockBankKeeper implements types.BankKeeper for tests.
+type mockBankKeeper struct {
+	balances map[string]sdk.Coins
+}
+
+func newMockBankKeeper() *mockBankKeeper {
+	return &mockBankKeeper{balances: make(map[string]sdk.Coins)}
+}
+
+func (m *mockBankKeeper) GetAllBalances(_ context.Context, addr sdk.AccAddress) sdk.Coins {
+	if c, ok := m.balances[addr.String()]; ok {
+		return c
+	}
+	return sdk.NewCoins()
+}
+
+func (m *mockBankKeeper) SpendableCoins(ctx context.Context, addr sdk.AccAddress) sdk.Coins {
+	return m.GetAllBalances(ctx, addr)
+}
+
+func (m *mockBankKeeper) SendCoins(_ context.Context, from, to sdk.AccAddress, amt sdk.Coins) error {
+	if amt.IsAnyNegative() {
+		return fmt.Errorf("negative amount")
+	}
+	if amt.IsZero() {
+		return nil
+	}
+	fromKey := from.String()
+	toKey := to.String()
+
+	fromBal := m.balances[fromKey]
+	if fromBal == nil {
+		fromBal = sdk.NewCoins()
+	}
+	toBal := m.balances[toKey]
+	if toBal == nil {
+		toBal = sdk.NewCoins()
+	}
+
+	if !fromBal.IsAllGTE(amt) {
+		return fmt.Errorf("insufficient funds")
+	}
+	fromBal = fromBal.Sub(amt...)
+	toBal = toBal.Add(amt...)
+
+	m.balances[fromKey] = fromBal
+	m.balances[toKey] = toBal
+	return nil
 }
 
 func initFixture(t *testing.T) *fixture {
@@ -45,8 +115,8 @@ func initFixture(t *testing.T) *fixture {
 		encCfg.Codec,
 		addressCodec,
 		authority,
-		nil, /* todo use mock */
-		nil, /* todo use mock*/
+		newMockAuthKeeper(),
+		newMockBankKeeper(),
 	)
 
 	// Initialize params

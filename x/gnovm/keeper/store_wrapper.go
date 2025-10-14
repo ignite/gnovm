@@ -3,39 +3,39 @@ package keeper
 import (
 	"context"
 
-	"cosmossdk.io/core/store"
+	corestore "cosmossdk.io/core/store"
 	"cosmossdk.io/log"
 	gnosdk "github.com/gnolang/gno/tm2/pkg/sdk"
-	"github.com/gnolang/gno/tm2/pkg/store/types"
+	gnostore "github.com/gnolang/gno/tm2/pkg/store"
 )
 
-var _ types.MultiStore = (*gnovmMultiStore)(nil)
+var _ gnostore.MultiStore = (*gnovmMultiStore)(nil)
 
 // gnovmMultiStore is a wrapper around the Cosmos SDK store service that implements
 // the gno store.MultiStore interface while restricting access to only the gnovm store.
 type gnovmMultiStore struct {
 	logger          log.Logger
-	storeService    store.KVStoreService
-	memStoreService store.MemoryStoreService
-	storeKey        types.StoreKey
-	memStoreKey     types.StoreKey
+	storeService    corestore.KVStoreService
+	memStoreService corestore.MemoryStoreService
+	storeKey        gnostore.StoreKey
+	memStoreKey     gnostore.StoreKey
 	ctx             gnosdk.Context
 	sdkCtx          context.Context
-	kvStore         store.KVStore // Cached KV store
+	kvStore         corestore.KVStore // Cached KV store
 }
 
 // NewGnovmMultiStore creates a new MultiStore wrapper that provides access
 // only to the gnovm store through the storeService.
 func NewGnovmMultiStore(
 	logger log.Logger,
-	storeService store.KVStoreService,
-	memStoreService store.MemoryStoreService,
-	storeKey types.StoreKey,
-	memStoreKey types.StoreKey,
+	storeService corestore.KVStoreService,
+	memStoreService corestore.MemoryStoreService,
+	storeKey gnostore.StoreKey,
+	memStoreKey gnostore.StoreKey,
 	ctx gnosdk.Context,
 	sdkCtx context.Context,
-) types.MultiStore {
-	return &gnovmMultiStore{
+) gnostore.MultiStore {
+	ms := &gnovmMultiStore{
 		logger:          logger,
 		storeService:    storeService,
 		memStoreService: memStoreService,
@@ -44,17 +44,20 @@ func NewGnovmMultiStore(
 		ctx:             ctx,
 		sdkCtx:          sdkCtx,
 	}
+	// Ensure the Gno context carries this MultiStore
+	ms.ctx = ms.ctx.WithMultiStore(ms)
+	return ms
 }
 
 // NewLazyGnovmMultiStore creates a new MultiStore wrapper that can be initialized
 // without a context and will lazily initialize the store when needed.
 func NewLazyGnovmMultiStore(
 	logger log.Logger,
-	storeService store.KVStoreService,
-	memStoreService store.MemoryStoreService,
-	storeKey types.StoreKey,
-	memStoreKey types.StoreKey,
-) types.MultiStore {
+	storeService corestore.KVStoreService,
+	memStoreService corestore.MemoryStoreService,
+	storeKey gnostore.StoreKey,
+	memStoreKey gnostore.StoreKey,
+) gnostore.MultiStore {
 	return &gnovmMultiStore{
 		logger:          logger,
 		storeService:    storeService,
@@ -66,7 +69,7 @@ func NewLazyGnovmMultiStore(
 
 // SetContext sets the contexts for the store wrapper. This allows lazy initialization.
 func (ms *gnovmMultiStore) SetContext(ctx gnosdk.Context, sdkCtx context.Context) {
-	ms.ctx = ctx
+	ms.ctx = ctx.WithMultiStore(ms)
 	ms.sdkCtx = sdkCtx
 	ms.kvStore = nil // Reset cached store
 }
@@ -74,7 +77,7 @@ func (ms *gnovmMultiStore) SetContext(ctx gnosdk.Context, sdkCtx context.Context
 // GetStore implements types.MultiStore.
 // It returns the gnovm store if the provided key matches our store key,
 // otherwise it panics as per the interface contract.
-func (ms *gnovmMultiStore) GetStore(key types.StoreKey) types.Store {
+func (ms *gnovmMultiStore) GetStore(key gnostore.StoreKey) gnostore.Store {
 	var memStore bool
 	if key.Name() == ms.memStoreKey.Name() {
 		memStore = true
@@ -103,7 +106,7 @@ func (ms *gnovmMultiStore) GetStore(key types.StoreKey) types.Store {
 
 // MultiCacheWrap implements types.MultiStore.
 // Returns a cache-wrapped version of this MultiStore.
-func (ms *gnovmMultiStore) MultiCacheWrap() types.MultiStore {
+func (ms *gnovmMultiStore) MultiCacheWrap() gnostore.MultiStore {
 	// For simplicity, return the same store as we're already wrapping
 	// the underlying store service which handles caching
 	return ms
@@ -116,12 +119,12 @@ func (ms *gnovmMultiStore) MultiWrite() {
 	// No-op as the store service handles writes directly
 }
 
-var _ types.Store = (*gnovmStore)(nil)
+var _ gnostore.Store = (*gnovmStore)(nil)
 
 // gnovmStore implements the gno Store interface using the Cosmos SDK KVStore.
 type gnovmStore struct {
 	logger  log.Logger
-	kvStore store.KVStore
+	kvStore corestore.KVStore
 }
 
 // Get implements types.Store.
@@ -159,7 +162,7 @@ func (s *gnovmStore) Delete(key []byte) {
 }
 
 // Iterator implements types.Store.
-func (s *gnovmStore) Iterator(start, end []byte) types.Iterator {
+func (s *gnovmStore) Iterator(start, end []byte) gnostore.Iterator {
 	iter, err := s.kvStore.Iterator(start, end)
 	if err != nil {
 		s.logger.Error("failed to create iterator", "start", string(start), "end", string(end), "error", err)
@@ -169,7 +172,7 @@ func (s *gnovmStore) Iterator(start, end []byte) types.Iterator {
 }
 
 // ReverseIterator implements types.Store.
-func (s *gnovmStore) ReverseIterator(start, end []byte) types.Iterator {
+func (s *gnovmStore) ReverseIterator(start, end []byte) gnostore.Iterator {
 	iter, err := s.kvStore.ReverseIterator(start, end)
 	if err != nil {
 		s.logger.Error("failed to create reverse iterator", "start", string(start), "end", string(end), "error", err)
@@ -180,7 +183,7 @@ func (s *gnovmStore) ReverseIterator(start, end []byte) types.Iterator {
 
 // CacheWrap implements types.Store.
 // Returns a cache-wrapped version of this store.
-func (s *gnovmStore) CacheWrap() types.Store {
+func (s *gnovmStore) CacheWrap() gnostore.Store {
 	// For simplicity, return the same store as the underlying service handles caching
 	return s
 }
@@ -191,12 +194,12 @@ func (s *gnovmStore) Write() {
 	// No-op as the store service handles writes directly
 }
 
-var _ types.Iterator = (*gnovmIterator)(nil)
+var _ gnostore.Iterator = (*gnovmIterator)(nil)
 
 // gnovmIterator wraps the Cosmos SDK iterator to implement the gno Iterator interface.
 type gnovmIterator struct {
 	logger log.Logger
-	iter   store.Iterator
+	iter   corestore.Iterator
 }
 
 // Domain implements types.Iterator.
@@ -234,7 +237,7 @@ func (it *gnovmIterator) Close() error {
 	return it.iter.Close()
 }
 
-var _ types.Iterator = (*emptyIterator)(nil)
+var _ gnostore.Iterator = (*emptyIterator)(nil)
 
 // emptyIterator is a no-op iterator returned when iterator creation fails.
 type emptyIterator struct{}

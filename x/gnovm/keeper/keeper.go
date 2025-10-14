@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"errors"
 	"fmt"
 
 	"cosmossdk.io/collections"
@@ -88,14 +87,8 @@ func NewKeeper(
 	}
 	k.Schema = schema
 
-	// gno keeper
-	k.VMKeeper = vm.NewVMKeeper(
-		storeKey,
-		memStoreKey,
-		vmAuthKeeper{k.logger, k.authKeeper, k.bankKeeper, k.vmParams},
-		vmBankKeeper{k.logger, k.bankKeeper, k.vmParams},
-		k.vmParams,
-	)
+	// VMKeeper will be created lazily when needed
+	// k.VMKeeper = nil initially
 
 	return k
 }
@@ -105,12 +98,9 @@ func (k Keeper) GetAuthority() []byte {
 	return k.authority
 }
 
-// initializeVMKeeper initializes the VMKeeper with a proper MultiStore.
+// initializeVMKeeper creates and initializes the VMKeeper with a proper MultiStore.
 // This should be called when we have access to a proper SDK context.
 func (k *Keeper) initializeVMKeeper(sdkCtx sdk.Context) error {
-	if k.VMKeeper == nil {
-		return errors.New("VMKeeper not created")
-	}
 	k.vmParams.SetSDKContext(sdkCtx)
 
 	// check if already initialized to avoid double initialization
@@ -118,27 +108,86 @@ func (k *Keeper) initializeVMKeeper(sdkCtx sdk.Context) error {
 		return nil
 	}
 
-	// Create a safe gno context for the MultiStore wrapper
-	gnoCtx := gnosdk.NewContext(
-		gnosdk.RunTxModeDeliver,
-		nil, // multistore - we'll provide our own wrapper
-		&bft.Header{ChainID: "gnovm-chain"},
-		types.NewSlogFromCosmosLogger(k.logger),
-	)
-
-	// Create a MultiStore wrapper that restricts access to only the gnovm store
-	multiStore := NewGnovmMultiStore(
+	// Create a MultiStore wrapper for initialization
+	multiStore := NewLazyGnovmMultiStore(
 		k.logger,
 		k.storeService,
 		k.memStoreService,
 		gnostore.NewStoreKey(k.storeKey.Name()),
 		gnostore.NewStoreKey(k.memStoreKey.Name()),
-		gnoCtx,
-		sdkCtx,
 	)
 
+	// Create a clean gno context for initialization
+	gnoCtx := gnosdk.NewContext(
+		gnosdk.RunTxModeDeliver,
+		multiStore,
+		&bft.Header{ChainID: sdkCtx.ChainID()},
+		types.NewSlogFromCosmosLogger(k.logger),
+	)
+
+	// Set the context on the multistore after creating the context
+	if lazyStore, ok := multiStore.(*gnovmMultiStore); ok {
+		lazyStore.SetContext(gnoCtx, sdkCtx)
+	}
+
+	// Create VMKeeper with proper initialization
+	k.VMKeeper = vm.NewVMKeeper(
+		k.storeKey,
+		k.memStoreKey,
+		vmAuthKeeper{k.logger, k.authKeeper, k.bankKeeper, k.vmParams},
+		vmBankKeeper{k.logger, k.bankKeeper, k.vmParams},
+		k.vmParams,
+	)
+
+	// Initialize the VMKeeper with the multistore
 	k.VMKeeper.Initialize(types.NewSlogFromCosmosLogger(k.logger), multiStore)
 	k.vmInitialized = true
 
 	return nil
+}
+
+// BuildGnoContextWithStore initializes the VM (if needed), creates a Gno context using
+// the MultiStore wrapper bound to the provided sdkCtx, and returns a per-tx context
+// with a transaction store attached. The caller is responsible for committing the
+// transaction store by calling VMKeeper.CommitGnoTransactionStore on the returned context.
+func (k *Keeper) BuildGnoContextWithStore(sdkCtx sdk.Context) (gnosdk.Context, error) {
+	if err := k.initializeVMKeeper(sdkCtx); err != nil {
+		return gnosdk.Context{}, err
+	}
+
+	var mode gnosdk.RunTxMode
+	switch sdkCtx.ExecMode() {
+	case sdk.ExecModeCheck, sdk.ExecModeReCheck:
+		mode = gnosdk.RunTxModeCheck
+	case sdk.ExecModeSimulate:
+		mode = gnosdk.RunTxModeSimulate
+	case sdk.ExecModeFinalize:
+		mode = gnosdk.RunTxModeSimulate
+	default:
+		return gnosdk.Context{}, fmt.Errorf("invalid exec mode: %v", sdkCtx.ExecMode())
+	}
+
+	// Create MultiStore wrapper for transaction
+	ms := NewLazyGnovmMultiStore(
+		k.logger,
+		k.storeService,
+		k.memStoreService,
+		gnostore.NewStoreKey(k.storeKey.Name()),
+		gnostore.NewStoreKey(k.memStoreKey.Name()),
+	)
+
+	gnoCtx := gnosdk.NewContext(
+		mode,
+		ms, // MultiStore provided by our wrapper
+		&bft.Header{ChainID: sdkCtx.ChainID()},
+		types.NewSlogFromCosmosLogger(k.logger),
+	)
+
+	// Set the context on the multistore after creating the context
+	if lazyStore, ok := ms.(*gnovmMultiStore); ok {
+		lazyStore.SetContext(gnoCtx, sdkCtx)
+	}
+
+	gnoCtx = k.VMKeeper.MakeGnoTransactionStore(gnoCtx)
+	return gnoCtx, nil
 }

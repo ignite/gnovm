@@ -7,8 +7,6 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
-	bft "github.com/gnolang/gno/tm2/pkg/bft/types"
-	gnosdk "github.com/gnolang/gno/tm2/pkg/sdk"
 	"github.com/gnolang/gno/tm2/pkg/std"
 
 	"github.com/ignite/gnovm/x/gnovm/types"
@@ -22,18 +20,11 @@ func (k msgServer) Run(ctx context.Context, msg *types.MsgRun) (*types.MsgRunRes
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	// ensure VMKeeper is initialized with MultiStore wrapper
-	if err := (&k).initializeVMKeeper(sdkCtx); err != nil {
+	gnoCtx, err := k.BuildGnoContextWithStore(sdkCtx)
+	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to initialize VM")
 	}
-
-	// build gno context using the store wrapper (same pattern as InitGenesis)
-	gnoCtx := gnosdk.NewContext(
-		gnosdk.RunTxModeDeliver,
-		nil, // MultiStore provided by our wrapper
-		&bft.Header{ChainID: sdkCtx.ChainID()},
-		types.NewSlogFromCosmosLogger(k.logger),
-	)
+	defer k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
 
 	send := types.StdCoinsFromSDKCoins(msg.Send)
 	maxDep := types.StdCoinsFromSDKCoins(sdk.NewCoins(msg.MaxDeposit))

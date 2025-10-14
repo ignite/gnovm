@@ -7,8 +7,7 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
-	bft "github.com/gnolang/gno/tm2/pkg/bft/types"
-	gnosdk "github.com/gnolang/gno/tm2/pkg/sdk"
+
 	"github.com/gnolang/gno/tm2/pkg/std"
 
 	"github.com/ignite/gnovm/x/gnovm/types"
@@ -25,12 +24,11 @@ func (k msgServer) AddPackage(ctx context.Context, msg *types.MsgAddPackage) (*t
 		return nil, errorsmod.Wrap(err, "failed to initialize VM")
 	}
 
-	gnoCtx := gnosdk.NewContext(
-		gnosdk.RunTxModeDeliver,
-		nil, // MultiStore provided by keeper's wrapper
-		&bft.Header{ChainID: sdkCtx.ChainID()},
-		types.NewSlogFromCosmosLogger(k.logger),
-	)
+	gnoCtx, err := k.BuildGnoContextWithStore(sdkCtx)
+	if err != nil {
+		return nil, errorsmod.Wrap(err, "failed to initialize VM")
+	}
+	defer k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
 
 	send := types.StdCoinsFromSDKCoins(msg.Deposit)
 	maxDep := types.StdCoinsFromSDKCoins(sdk.NewCoins(msg.MaxDeposit))

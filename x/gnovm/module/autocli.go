@@ -35,16 +35,24 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "deposit"}},
 				},
 				{
-					RpcMethod:      "Call",
-					Use:            "call [send] [pkg-path] [function] [args]",
-					Short:          "Send a Call tx",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "send"}, {ProtoField: "pkg_path"}, {ProtoField: "function"}, {ProtoField: "args"}},
+					RpcMethod: "Call",
+					Use:       "call [send] [pkg-path] [function] [args]",
+					Short:     "Send a Call tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "send"},
+						{ProtoField: "pkg_path"},
+						{ProtoField: "function"},
+						{ProtoField: "args"},
+					},
 				},
 				{
-					RpcMethod:      "Run",
-					Use:            "run [send] [pkg]",
-					Short:          "Send a Run tx",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "send"}, {ProtoField: "pkg"}},
+					RpcMethod: "Run",
+					Use:       "run [send] [pkg]",
+					Short:     "Send a Run tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "send"},
+						{ProtoField: "pkg"},
+					},
 				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},

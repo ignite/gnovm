@@ -25,8 +25,17 @@ func SimulateMsgCall(
 			Caller: simAccount.Address.String(),
 		}
 
-		// TODO: Handle the Call simulation
+		// Fill required fields to pass validation and execute via msg server
+		msg.PkgPath = "gno.land/r/demo/p"
+		msg.Function = "main"
+		msg.Args = nil
+		msg.MaxDeposit = sdk.NewInt64Coin("test", 0)
 
-		return simtypes.NoOpMsg(types.ModuleName, sdk.MsgTypeURL(msg), "Call simulation not implemented"), nil, nil
+		ms := keeper.NewMsgServerImpl(&k)
+		if _, err := ms.Call(ctx, msg); err != nil {
+			return simtypes.NoOpMsg(types.ModuleName, sdk.MsgTypeURL(msg), err.Error()), nil, err
+		}
+
+		return simtypes.NewOperationMsg(msg, true, "call executed"), nil, nil
 	}
 }

@@ -4,14 +4,14 @@ import (
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
 
-var _ types.QueryServer = queryServer{}
+var _ types.QueryServer = (*queryServer)(nil)
 
 // NewQueryServerImpl returns an implementation of the QueryServer interface
 // for the provided Keeper.
-func NewQueryServerImpl(k Keeper) types.QueryServer {
-	return queryServer{k}
+func NewQueryServerImpl(k *Keeper) types.QueryServer {
+	return &queryServer{k}
 }
 
 type queryServer struct {
-	k Keeper
+	k *Keeper
 }

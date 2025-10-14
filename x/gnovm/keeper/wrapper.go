@@ -105,6 +105,21 @@ func (k *vmKeeperParams) GetAny(ctx gnosdk.Context, key string) interface{} {
 	// get raw value from the store
 	data := k.GetRaw(ctx, key)
 	if len(data) == 0 {
+		// fallback to module params when not found in raw store
+		if params, err := k.k.Params.Get(k.sdkCtx); err == nil {
+			switch key {
+			case "vm:p:sysnames_pkgpath":
+				return params.SysnamesPkgpath
+			case "vm:p:chain_domain":
+				return params.ChainDomain
+			case "vm:p:default_deposit":
+				return params.DefaultDeposit
+			case "vm:p:storage_price":
+				return params.StoragePrice
+			case "vm:p:storage_fee_collector":
+				return params.StorageFeeCollector
+			}
+		}
 		return nil
 	}
 
@@ -145,6 +160,13 @@ func (k *vmKeeperParams) GetBytes(ctx gnosdk.Context, key string, ptr *[]byte) {
 	// get raw value from the store
 	data := k.GetRaw(ctx, key)
 	if len(data) == 0 {
+		// fallback to module params for known byte keys
+		if key == "vm:p:storage_fee_collector" {
+			if params, err := k.k.Params.Get(k.sdkCtx); err == nil {
+				*ptr = append([]byte(nil), params.StorageFeeCollector...)
+				return
+			}
+		}
 		*ptr = []byte{}
 		return
 	}
@@ -193,6 +215,23 @@ func (k *vmKeeperParams) GetString(ctx gnosdk.Context, key string, ptr *string) 
 	// get raw value from the store
 	data := k.GetRaw(ctx, key)
 	if len(data) == 0 {
+		// fallback to module params for known string keys
+		if params, err := k.k.Params.Get(k.sdkCtx); err == nil {
+			switch key {
+			case "vm:p:sysnames_pkgpath":
+				*ptr = params.SysnamesPkgpath
+				return
+			case "vm:p:chain_domain":
+				*ptr = params.ChainDomain
+				return
+			case "vm:p:default_deposit":
+				*ptr = params.DefaultDeposit
+				return
+			case "vm:p:storage_price":
+				*ptr = params.StoragePrice
+				return
+			}
+		}
 		*ptr = ""
 		return
 	}

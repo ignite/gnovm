@@ -11,7 +11,7 @@ import (
 
 func TestMsgUpdateParams(t *testing.T) {
 	f := initFixture(t)
-	ms := keeper.NewMsgServerImpl(f.keeper)
+	ms := keeper.NewMsgServerImpl(&f.keeper)
 
 	params := types.DefaultParams()
 	require.NoError(t, f.keeper.Params.Set(f.ctx, params))
