@@ -24,7 +24,6 @@ func (k msgServer) Run(ctx context.Context, msg *types.MsgRun) (*types.MsgRunRes
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to initialize VM")
 	}
-	defer k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
 
 	send := types.StdCoinsFromSDKCoins(msg.Send)
 	maxDep := types.StdCoinsFromSDKCoins(sdk.NewCoins(msg.MaxDeposit))

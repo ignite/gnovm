@@ -6,6 +6,7 @@ import (
 
 	errorsmod "cosmossdk.io/errors"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
 
@@ -33,6 +34,21 @@ func (k msgServer) UpdateParams(ctx context.Context, req *types.MsgUpdateParams)
 		return nil, err
 	}
 
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	if err := k.initializeVMKeeper(sdkCtx); err != nil {
+		return nil, err
+	}
+
+	gnoCtx, err := k.BuildGnoContextWithStore(sdkCtx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := k.VMKeeper.SetParams(gnoCtx, req.Params.ToVmParams()); err != nil {
+		return nil, err
+	}
+
+	// duplicate to SDK module state
 	if err := k.Params.Set(ctx, req.Params); err != nil {
 		return nil, err
 	}

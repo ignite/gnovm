@@ -22,7 +22,6 @@ func (k msgServer) Call(ctx context.Context, msg *types.MsgCall) (*types.MsgCall
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to initialize VM")
 	}
-	defer k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
 
 	vmMsg := vm.MsgCall{
 		Caller:     types.ToCryptoAddress(callerBytes),

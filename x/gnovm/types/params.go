@@ -1,7 +1,15 @@
 package types
 
 import (
+	"cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
+)
+
+var (
+	defaultDepositCost int64 = 100
+	defaultStorageCost int64 = 1
 )
 
 // DefaultParams returns the default set of parameters.
@@ -10,8 +18,8 @@ func DefaultParams() Params {
 	return Params{
 		SysnamesPkgpath:     defaultVmParams.SysNamesPkgPath,
 		ChainDomain:         defaultVmParams.ChainDomain,
-		DefaultDeposit:      defaultVmParams.DefaultDeposit,
-		StoragePrice:        defaultVmParams.StoragePrice,
+		DefaultDeposit:      sdk.NewCoin(sdk.DefaultBondDenom, math.NewInt(defaultDepositCost)).String(),
+		StoragePrice:        sdk.NewCoin(sdk.DefaultBondDenom, math.NewInt(defaultStorageCost)).String(),
 		StorageFeeCollector: defaultVmParams.StorageFeeCollector[:],
 	}
 }
@@ -40,4 +48,15 @@ func (p Params) ToVmParams() vm.Params {
 	}
 
 	return vmParams
+}
+
+// VmParamsToParams converts the vm.Params to Params.
+func VmParamsToParams(vmParams vm.Params) Params {
+	return Params{
+		SysnamesPkgpath:     vmParams.SysNamesPkgPath,
+		ChainDomain:         vmParams.ChainDomain,
+		DefaultDeposit:      vmParams.DefaultDeposit,
+		StoragePrice:        vmParams.StoragePrice,
+		StorageFeeCollector: vmParams.StorageFeeCollector[:],
+	}
 }

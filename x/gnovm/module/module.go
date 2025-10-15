@@ -12,8 +12,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
+	gnovmclient "github.com/ignite/gnovm/x/gnovm/client"
 	"github.com/ignite/gnovm/x/gnovm/keeper"
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
@@ -56,6 +58,13 @@ func (AppModule) IsAppModule() {}
 // Name returns the name of the module as a string.
 func (AppModule) Name() string {
 	return types.ModuleName
+}
+
+// GetTxCmd returns the root tx command for the gnovm module.
+func (amb AppModule) GetTxCmd() *cobra.Command {
+	return gnovmclient.NewTxCmd(
+		amb.cdc.InterfaceRegistry().SigningContext().AddressCodec(),
+	)
 }
 
 // RegisterLegacyAminoCodec registers the amino codec

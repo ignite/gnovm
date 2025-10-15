@@ -28,6 +28,9 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
 	"github.com/ignite/gnovm/docs"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	gnovmante "github.com/ignite/gnovm/x/gnovm/ante"
 	gnovmmodulekeeper "github.com/ignite/gnovm/x/gnovm/keeper"
 )
 
@@ -148,6 +151,11 @@ func New(
 	// create the simulation manager and define the order of the modules for deterministic simulations
 	app.sm = module.NewSimulationManagerFromAppModules(app.ModuleManager.Modules, make(map[string]module.AppModuleSimulation))
 	app.sm.RegisterStoreDecoders()
+
+	// Setup post handlers
+	app.SetPostHandler(sdk.ChainPostDecorators(
+		gnovmante.NewTransactionsPostHandler(app.Logger(), app.GnovmKeeper),
+	))
 
 	// A custom InitChainer can be set if extra pre-init-genesis logic is required.
 	// By default, when using app wiring enabled module, this is not required.

@@ -38,12 +38,11 @@ type Keeper struct {
 
 	Schema collections.Schema
 	Params collections.Item[types.Params]
+	// vmKeeperParams manages VM module parameters and state.
+	vmParams *vmKeeperParams
 
 	authKeeper types.AuthKeeper
 	bankKeeper types.BankKeeper
-
-	// Reference to vmKeeperParams for setting SDK context
-	vmParams *vmKeeperParams
 }
 
 // NewKeeper creates a new Keeper instance.
@@ -117,11 +116,16 @@ func (k *Keeper) initializeVMKeeper(sdkCtx sdk.Context) error {
 		gnostore.NewStoreKey(k.memStoreKey.Name()),
 	)
 
+	chainID := sdkCtx.ChainID()
+	if chainID == "" {
+		chainID = "default_chain_id" // TODO: investigate why chainID is emtpy here
+	}
+
 	// Create a clean gno context for initialization
 	gnoCtx := gnosdk.NewContext(
 		gnosdk.RunTxModeDeliver,
 		multiStore,
-		&bft.Header{ChainID: sdkCtx.ChainID()},
+		&bft.Header{ChainID: chainID},
 		types.NewSlogFromCosmosLogger(k.logger),
 	)
 
@@ -148,8 +152,7 @@ func (k *Keeper) initializeVMKeeper(sdkCtx sdk.Context) error {
 
 // BuildGnoContextWithStore initializes the VM (if needed), creates a Gno context using
 // the MultiStore wrapper bound to the provided sdkCtx, and returns a per-tx context
-// with a transaction store attached. The caller is responsible for committing the
-// transaction store by calling VMKeeper.CommitGnoTransactionStore on the returned context.
+// with a transaction store attached.
 func (k *Keeper) BuildGnoContextWithStore(sdkCtx sdk.Context) (gnosdk.Context, error) {
 	if err := k.initializeVMKeeper(sdkCtx); err != nil {
 		return gnosdk.Context{}, err
@@ -176,10 +179,15 @@ func (k *Keeper) BuildGnoContextWithStore(sdkCtx sdk.Context) (gnosdk.Context, e
 		gnostore.NewStoreKey(k.memStoreKey.Name()),
 	)
 
+	chainID := sdkCtx.ChainID()
+	if chainID == "" {
+		chainID = "default_chain_id" // TODO: investigate why chainID is emtpy here
+	}
+
 	gnoCtx := gnosdk.NewContext(
 		mode,
 		ms, // MultiStore provided by our wrapper
-		&bft.Header{ChainID: sdkCtx.ChainID()},
+		&bft.Header{ChainID: chainID},
 		types.NewSlogFromCosmosLogger(k.logger),
 	)
 

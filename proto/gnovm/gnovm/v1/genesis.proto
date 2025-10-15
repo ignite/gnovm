@@ -14,4 +14,6 @@ message GenesisState {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+  // realm_params defines the realm parameters of the module.
+  bytes realm_params = 2;
 }
