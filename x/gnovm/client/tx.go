@@ -123,16 +123,11 @@ func NewCallCmd(addressCodec address.Codec) *cobra.Command {
 // NewRunCmd returns a CLI command handler for creating a MsgRun transaction.
 func NewRunCmd(addressCodec address.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "run [send] [pkgFolder] --from caller",
-		Args:  cobra.ExactArgs(2),
+		Use:   "run [pkgName] [pkgFolder] [deposit] --from caller",
+		Args:  cobra.ExactArgs(3),
 		Short: "Run a tx on the GnoVM",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			amount, err := sdk.ParseCoinNormalized(args[0])
 			if err != nil {
 				return err
 			}
@@ -158,7 +153,12 @@ func NewRunCmd(addressCodec address.Codec) *cobra.Command {
 				return fmt.Errorf("failed to marshal package: %v", err)
 			}
 
-			msg := types.NewMsgRun(caller, sdk.Coins{amount}, amount, pkgJSON)
+			deposit, err := sdk.ParseCoinNormalized(args[2])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgRun(caller, sdk.Coins{deposit}, deposit, pkgJSON)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
