@@ -24,34 +24,9 @@ type gnovmMultiStore struct {
 	kvStore         corestore.KVStore // Cached KV store
 }
 
-// NewGnovmMultiStore creates a new MultiStore wrapper that provides access
-// only to the gnovm store through the storeService.
-func NewGnovmMultiStore(
-	logger log.Logger,
-	storeService corestore.KVStoreService,
-	memStoreService corestore.MemoryStoreService,
-	storeKey gnostore.StoreKey,
-	memStoreKey gnostore.StoreKey,
-	ctx gnosdk.Context,
-	sdkCtx context.Context,
-) gnostore.MultiStore {
-	ms := &gnovmMultiStore{
-		logger:          logger,
-		storeService:    storeService,
-		memStoreService: memStoreService,
-		storeKey:        storeKey,
-		memStoreKey:     memStoreKey,
-		ctx:             ctx,
-		sdkCtx:          sdkCtx,
-	}
-	// Ensure the Gno context carries this MultiStore
-	ms.ctx = ms.ctx.WithMultiStore(ms)
-	return ms
-}
-
-// NewLazyGnovmMultiStore creates a new MultiStore wrapper that can be initialized
+// NewGnovmMultiStore creates a new MultiStore wrapper that can be initialized
 // without a context and will lazily initialize the store when needed.
-func NewLazyGnovmMultiStore(
+func NewGnovmMultiStore(
 	logger log.Logger,
 	storeService corestore.KVStoreService,
 	memStoreService corestore.MemoryStoreService,

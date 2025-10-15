@@ -108,7 +108,7 @@ func (k *Keeper) initializeVMKeeper(sdkCtx sdk.Context) error {
 	}
 
 	// Create a MultiStore wrapper for initialization
-	multiStore := NewLazyGnovmMultiStore(
+	multiStore := NewGnovmMultiStore(
 		k.logger,
 		k.storeService,
 		k.memStoreService,
@@ -165,13 +165,13 @@ func (k *Keeper) BuildGnoContextWithStore(sdkCtx sdk.Context) (gnosdk.Context, e
 	case sdk.ExecModeSimulate:
 		mode = gnosdk.RunTxModeSimulate
 	case sdk.ExecModeFinalize:
-		mode = gnosdk.RunTxModeSimulate
+		mode = gnosdk.RunTxModeDeliver
 	default:
 		return gnosdk.Context{}, fmt.Errorf("invalid exec mode: %v", sdkCtx.ExecMode())
 	}
 
 	// Create MultiStore wrapper for transaction
-	ms := NewLazyGnovmMultiStore(
+	ms := NewGnovmMultiStore(
 		k.logger,
 		k.storeService,
 		k.memStoreService,

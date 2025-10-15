@@ -1,30 +1,28 @@
 package ante
 
 import (
-	"cosmossdk.io/log"
-
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/gnovm/x/gnovm/keeper"
+	"github.com/ignite/gnovm/x/gnovm/types"
 )
 
-func NewTransactionsAnteHandler(logger log.Logger, k keeper.Keeper) sdk.AnteDecorator {
-	return &gnoTransactionsAnte{
-		logger: logger,
-		k:      k,
-	}
+func NewAnteHandler() sdk.AnteDecorator {
+	return &gnoAnteHandler{}
 }
 
-type gnoTransactionsAnte struct {
-	logger log.Logger
-	k      keeper.Keeper
-}
+type gnoAnteHandler struct{}
 
-func (gta gnoTransactionsAnte) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (sdk.Context, error) {
-	gnoCtx, err := gta.k.BuildGnoContextWithStore(ctx)
-	if err != nil {
-		return ctx, err
+func (*gnoAnteHandler) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (newCtx sdk.Context, err error) {
+	msgs := tx.GetMsgs()
+	for _, msg := range msgs {
+		switch {
+		case sdk.MsgTypeURL(msg) == sdk.MsgTypeURL(&types.MsgRun{}) ||
+			sdk.MsgTypeURL(msg) == sdk.MsgTypeURL(&types.MsgAddPackage{}) ||
+			sdk.MsgTypeURL(msg) == sdk.MsgTypeURL(&types.MsgCall{}):
+			ctx = ctx.WithGasMeter(storetypes.NewInfiniteGasMeter()) // TODO: check if this is a hack or if the VM does prevent infinite gas.
+			return ctx, nil
+		}
 	}
-	_ = gta.k.VMKeeper.MakeGnoTransactionStore(gnoCtx) // TODO
 
-	return next(ctx, tx, simulate)
+	return ctx, nil
 }

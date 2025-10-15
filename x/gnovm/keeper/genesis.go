@@ -9,11 +9,18 @@ import (
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 	"github.com/gnolang/gno/tm2/pkg/sdk/params"
 	"github.com/ignite/gnovm/x/gnovm/types"
+
+	"golang.org/x/tools/go/packages"
 )
+
+const defaultStdLibs = "github.com/gnolang/gno/gnovm/stdlibs"
 
 // InitGenesis initializes the module's state from a provided genesis state.
 func (k *Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) error {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	if err := k.Params.Set(ctx, genState.Params); err != nil {
+		return err
+	}
 
 	// Ensure VMKeeper is initialized before using it
 	if err := k.initializeVMKeeper(sdkCtx); err != nil {
@@ -42,9 +49,17 @@ func (k *Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) e
 		},
 	)
 
-	if err := k.Params.Set(ctx, genState.Params); err != nil {
-		return err
+	pkg, err := packages.Load(&packages.Config{Mode: packages.LoadFiles}, defaultStdLibs)
+	if err != nil {
+		return fmt.Errorf("failed to load gno stdlib packages: %w", err)
 	}
+	if len(pkg) == 0 {
+		return fmt.Errorf("no gno stdlib packages found")
+	}
+
+	// Initialize the standard library
+	k.VMKeeper.LoadStdlib(gnoCtx, pkg[0].Dir)
+	k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
 
 	return nil
 }

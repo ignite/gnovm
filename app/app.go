@@ -20,6 +20,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
@@ -152,9 +153,26 @@ func New(
 	app.sm = module.NewSimulationManagerFromAppModules(app.ModuleManager.Modules, make(map[string]module.AppModuleSimulation))
 	app.sm.RegisterStoreDecoders()
 
+	// Setup ante handlers
+	app.SetAnteHandler(sdk.ChainAnteDecorators([]sdk.AnteDecorator{
+		ante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
+		ante.NewExtensionOptionsDecorator(nil),
+		ante.NewValidateBasicDecorator(),
+		ante.NewTxTimeoutHeightDecorator(),
+		ante.NewValidateMemoDecorator(app.AuthKeeper),
+		ante.NewConsumeGasForTxSizeDecorator(app.AuthKeeper),
+		ante.NewDeductFeeDecorator(app.AuthKeeper, app.BankKeeper, nil, nil),
+		ante.NewSetPubKeyDecorator(app.AuthKeeper), // SetPubKeyDecorator must be called before all signature verification decorators
+		ante.NewValidateSigCountDecorator(app.AuthKeeper),
+		ante.NewSigGasConsumeDecorator(app.AuthKeeper, ante.DefaultSigVerificationGasConsumer),
+		ante.NewSigVerificationDecorator(app.AuthKeeper, app.txConfig.SignModeHandler()),
+		ante.NewIncrementSequenceDecorator(app.AuthKeeper),
+		gnovmante.NewAnteHandler(),
+	}...))
+
 	// Setup post handlers
 	app.SetPostHandler(sdk.ChainPostDecorators(
-		gnovmante.NewTransactionsPostHandler(app.Logger(), app.GnovmKeeper),
+		gnovmante.NewPostHandler(app.Logger(), app.GnovmKeeper),
 	))
 
 	// A custom InitChainer can be set if extra pre-init-genesis logic is required.

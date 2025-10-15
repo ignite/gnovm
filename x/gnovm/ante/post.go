@@ -7,7 +7,7 @@ import (
 	"github.com/ignite/gnovm/x/gnovm/keeper"
 )
 
-func NewTransactionsPostHandler(logger log.Logger, k keeper.Keeper) sdk.PostDecorator {
+func NewPostHandler(logger log.Logger, k keeper.Keeper) sdk.PostDecorator {
 	return &gnoTransactionsPost{
 		logger: logger,
 		k:      k,

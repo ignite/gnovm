@@ -156,7 +156,8 @@ func TestNewGnovmMultiStore(t *testing.T) {
 	memStoreKey := gnostore.NewStoreKey("test-mem")
 	gnoCtx := gnosdk.NewContext(gnosdk.RunTxModeCheck, nil, &bft.Header{ChainID: "test-chain"}, slog.Default())
 
-	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey, gnoCtx, context.Background())
+	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey)
+	multiStore.(*gnovmMultiStore).SetContext(gnoCtx, context.Background())
 
 	require.NotNil(t, multiStore)
 	assert.Assert(t, multiStore != nil)
@@ -170,7 +171,8 @@ func TestGnovmMultiStore_GetStore(t *testing.T) {
 	memStoreKey := gnostore.NewStoreKey("test-mem")
 	gnoCtx := gnosdk.NewContext(gnosdk.RunTxModeCheck, nil, &bft.Header{ChainID: "test-chain"}, slog.Default())
 
-	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey, gnoCtx, context.Background())
+	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey)
+	multiStore.(*gnovmMultiStore).SetContext(gnoCtx, context.Background())
 
 	t.Run("valid store key", func(t *testing.T) {
 		store := multiStore.GetStore(storeKey)
@@ -194,7 +196,8 @@ func TestGnovmMultiStore_MultiCacheWrap(t *testing.T) {
 	memStoreKey := gnostore.NewStoreKey("test-mem")
 	gnoCtx := gnosdk.NewContext(gnosdk.RunTxModeCheck, nil, &bft.Header{ChainID: "test-chain"}, slog.Default())
 
-	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey, gnoCtx, context.Background())
+	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey)
+	multiStore.(*gnovmMultiStore).SetContext(gnoCtx, context.Background())
 
 	cachedStore := multiStore.MultiCacheWrap()
 	require.NotNil(t, cachedStore)
@@ -211,7 +214,8 @@ func TestGnovmMultiStore_MultiWrite(t *testing.T) {
 	memStoreKey := gnostore.NewStoreKey("test-mem")
 	gnoCtx := gnosdk.NewContext(gnosdk.RunTxModeCheck, nil, &bft.Header{ChainID: "test-chain"}, slog.Default())
 
-	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey, gnoCtx, context.Background())
+	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey)
+	multiStore.(*gnovmMultiStore).SetContext(gnoCtx, context.Background())
 
 	// Should not panic
 	require.NotPanics(t, func() {
@@ -227,7 +231,9 @@ func TestGnovmStore_BasicOperations(t *testing.T) {
 	memStoreKey := gnostore.NewStoreKey("test-mem")
 	gnoCtx := gnosdk.NewContext(gnosdk.RunTxModeCheck, nil, &bft.Header{ChainID: "test-chain"}, slog.Default())
 
-	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey, gnoCtx, context.Background())
+	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey)
+	multiStore.(*gnovmMultiStore).SetContext(gnoCtx, context.Background())
+
 	store := multiStore.GetStore(storeKey)
 
 	t.Run("set and get", func(t *testing.T) {
@@ -269,7 +275,9 @@ func TestGnovmStore_Iterator(t *testing.T) {
 	memStoreKey := gnostore.NewStoreKey("test-mem")
 	gnoCtx := gnosdk.NewContext(gnosdk.RunTxModeCheck, nil, &bft.Header{ChainID: "test-chain"}, slog.Default())
 
-	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey, gnoCtx, context.Background())
+	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey)
+	multiStore.(*gnovmMultiStore).SetContext(gnoCtx, context.Background())
+
 	store := multiStore.GetStore(storeKey)
 
 	// Set up test data
@@ -342,7 +350,9 @@ func TestGnovmStore_CacheWrap(t *testing.T) {
 	memStoreKey := gnostore.NewStoreKey("test-mem")
 	gnoCtx := gnosdk.NewContext(gnosdk.RunTxModeCheck, nil, &bft.Header{ChainID: "test-chain"}, slog.Default())
 
-	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey, gnoCtx, context.Background())
+	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey)
+	multiStore.(*gnovmMultiStore).SetContext(gnoCtx, context.Background())
+
 	store := multiStore.GetStore(storeKey)
 
 	cachedStore := store.CacheWrap()
@@ -360,7 +370,9 @@ func TestGnovmStore_Write(t *testing.T) {
 	memStoreKey := gnostore.NewStoreKey("test-mem")
 	gnoCtx := gnosdk.NewContext(gnosdk.RunTxModeCheck, nil, &bft.Header{ChainID: "test-chain"}, slog.Default())
 
-	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey, gnoCtx, context.Background())
+	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey)
+	multiStore.(*gnovmMultiStore).SetContext(gnoCtx, context.Background())
+
 	store := multiStore.GetStore(storeKey)
 
 	// Should not panic
@@ -379,7 +391,8 @@ func TestKeeper_NewMultiStore(t *testing.T) {
 	memStoreKey := gnostore.NewStoreKey("test-mem")
 	gnoCtx := gnosdk.NewContext(gnosdk.RunTxModeCheck, nil, &bft.Header{ChainID: "test-chain"}, slog.Default())
 
-	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey, gnoCtx, context.Background())
+	multiStore := NewGnovmMultiStore(logger, storeService, memStoreService, storeKey, memStoreKey)
+	multiStore.(*gnovmMultiStore).SetContext(gnoCtx, context.Background())
 
 	// Verify it implements the MultiStore interface
 	var _ types.MultiStore = multiStore
