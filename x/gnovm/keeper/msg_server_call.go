@@ -10,7 +10,7 @@ import (
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
 
-func (k msgServer) Call(ctx context.Context, msg *types.MsgCall) (*types.MsgCallResponse, error) {
+func (k msgServer) Call(ctx context.Context, msg *types.MsgCall) (resp *types.MsgCallResponse, err error) {
 	callerBytes, err := k.addressCodec.StringToBytes(msg.Caller)
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to convert caller address")
@@ -32,21 +32,17 @@ func (k msgServer) Call(ctx context.Context, msg *types.MsgCall) (*types.MsgCall
 		Args:       msg.Args,
 	}
 
-	var result string
-	var callErr error
-	func() {
-		defer func() {
-			if r := recover(); r != nil {
-				callErr = fmt.Errorf("panic while calling VM: %v", r)
-			}
-		}()
-		result, callErr = k.VMKeeper.Call(
-			gnoCtx,
-			vmMsg,
-		)
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic while calling VM: %v", r)
+		}
 	}()
-	if callErr != nil {
-		return nil, errorsmod.Wrap(callErr, "failed to call VM")
+	result, err := k.VMKeeper.Call(
+		gnoCtx,
+		vmMsg,
+	)
+	if err != nil {
+		return nil, errorsmod.Wrap(err, "failed to call VM")
 	}
 
 	return &types.MsgCallResponse{
