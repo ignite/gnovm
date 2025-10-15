@@ -11,6 +11,10 @@ To install the GnoVM module, please follow the instructions below:
 
 ## Usage
 
+```bash
+gnovmd tx gnovm add-package gno.land/r/demo/counter github.com/gno/examples/gno.land/r/demo/counter 5000stake --from alice
+```
+
 > TBD
 
 ## Scaffolded with Ignite

@@ -17,6 +17,20 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Use:       "params",
 					Short:     "Shows the parameters of the module",
 				},
+				{
+					RpcMethod:      "Doc",
+					Use:            "doc [pkg-path]",
+					Short:          "Query raw documentation from a package",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "pkg_path"}},
+				},
+
+				{
+					RpcMethod:      "RealmStorage",
+					Use:            "realm-storage [pkg-path]",
+					Short:          "Query storage from a realm",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "pkg_path"}},
+				},
+
 				// this line is used by ignite scaffolding # autocli/query
 			},
 		},

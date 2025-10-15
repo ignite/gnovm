@@ -114,35 +114,229 @@ func (m *QueryParamsResponse) GetParams() Params {
 	return Params{}
 }
 
+// QueryDocRequest defines the QueryDocRequest message.
+type QueryDocRequest struct {
+	PkgPath string `protobuf:"bytes,1,opt,name=pkg_path,json=pkgPath,proto3" json:"pkg_path,omitempty"`
+}
+
+func (m *QueryDocRequest) Reset()         { *m = QueryDocRequest{} }
+func (m *QueryDocRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryDocRequest) ProtoMessage()    {}
+func (*QueryDocRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a08b717a1bd75243, []int{2}
+}
+func (m *QueryDocRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryDocRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryDocRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryDocRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryDocRequest.Merge(m, src)
+}
+func (m *QueryDocRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryDocRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryDocRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryDocRequest proto.InternalMessageInfo
+
+func (m *QueryDocRequest) GetPkgPath() string {
+	if m != nil {
+		return m.PkgPath
+	}
+	return ""
+}
+
+// QueryDocResponse defines the QueryDocResponse message.
+type QueryDocResponse struct {
+	Content string `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
+}
+
+func (m *QueryDocResponse) Reset()         { *m = QueryDocResponse{} }
+func (m *QueryDocResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryDocResponse) ProtoMessage()    {}
+func (*QueryDocResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a08b717a1bd75243, []int{3}
+}
+func (m *QueryDocResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryDocResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryDocResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryDocResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryDocResponse.Merge(m, src)
+}
+func (m *QueryDocResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryDocResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryDocResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryDocResponse proto.InternalMessageInfo
+
+func (m *QueryDocResponse) GetContent() string {
+	if m != nil {
+		return m.Content
+	}
+	return ""
+}
+
+// QueryRealmStorageRequest defines the QueryRealmStorageRequest message.
+type QueryRealmStorageRequest struct {
+	PkgPath string `protobuf:"bytes,1,opt,name=pkg_path,json=pkgPath,proto3" json:"pkg_path,omitempty"`
+}
+
+func (m *QueryRealmStorageRequest) Reset()         { *m = QueryRealmStorageRequest{} }
+func (m *QueryRealmStorageRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryRealmStorageRequest) ProtoMessage()    {}
+func (*QueryRealmStorageRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a08b717a1bd75243, []int{4}
+}
+func (m *QueryRealmStorageRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryRealmStorageRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryRealmStorageRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryRealmStorageRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryRealmStorageRequest.Merge(m, src)
+}
+func (m *QueryRealmStorageRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryRealmStorageRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryRealmStorageRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryRealmStorageRequest proto.InternalMessageInfo
+
+func (m *QueryRealmStorageRequest) GetPkgPath() string {
+	if m != nil {
+		return m.PkgPath
+	}
+	return ""
+}
+
+// QueryRealmStorageResponse defines the QueryRealmStorageResponse message.
+type QueryRealmStorageResponse struct {
+	Storage string `protobuf:"bytes,1,opt,name=storage,proto3" json:"storage,omitempty"`
+}
+
+func (m *QueryRealmStorageResponse) Reset()         { *m = QueryRealmStorageResponse{} }
+func (m *QueryRealmStorageResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryRealmStorageResponse) ProtoMessage()    {}
+func (*QueryRealmStorageResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a08b717a1bd75243, []int{5}
+}
+func (m *QueryRealmStorageResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryRealmStorageResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryRealmStorageResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryRealmStorageResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryRealmStorageResponse.Merge(m, src)
+}
+func (m *QueryRealmStorageResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryRealmStorageResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryRealmStorageResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryRealmStorageResponse proto.InternalMessageInfo
+
+func (m *QueryRealmStorageResponse) GetStorage() string {
+	if m != nil {
+		return m.Storage
+	}
+	return ""
+}
+
 func init() {
 	proto.RegisterType((*QueryParamsRequest)(nil), "gnovm.gnovm.v1.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "gnovm.gnovm.v1.QueryParamsResponse")
+	proto.RegisterType((*QueryDocRequest)(nil), "gnovm.gnovm.v1.QueryDocRequest")
+	proto.RegisterType((*QueryDocResponse)(nil), "gnovm.gnovm.v1.QueryDocResponse")
+	proto.RegisterType((*QueryRealmStorageRequest)(nil), "gnovm.gnovm.v1.QueryRealmStorageRequest")
+	proto.RegisterType((*QueryRealmStorageResponse)(nil), "gnovm.gnovm.v1.QueryRealmStorageResponse")
 }
 
 func init() { proto.RegisterFile("gnovm/gnovm/v1/query.proto", fileDescriptor_a08b717a1bd75243) }
 
 var fileDescriptor_a08b717a1bd75243 = []byte{
-	// 312 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x90, 0x41, 0x4a, 0x03, 0x31,
-	0x14, 0x86, 0x27, 0x82, 0x05, 0x47, 0x10, 0x8c, 0x45, 0x64, 0xd4, 0x54, 0x46, 0x0a, 0xd2, 0xc5,
-	0x84, 0xa9, 0x2b, 0x57, 0x42, 0x4f, 0x50, 0xbb, 0x74, 0x97, 0x29, 0x21, 0x06, 0x9c, 0xbc, 0xb4,
-	0x49, 0x87, 0x76, 0xa9, 0x27, 0x10, 0xbc, 0x84, 0x4b, 0x8f, 0xd1, 0x65, 0xc1, 0x8d, 0x2b, 0x91,
-	0x56, 0xf0, 0x1a, 0xd2, 0x24, 0x9b, 0xa9, 0xe2, 0xe6, 0xe5, 0xf1, 0xe7, 0xfb, 0x5f, 0xfe, 0x97,
-	0x38, 0x11, 0x0a, 0xaa, 0x92, 0xfa, 0x5a, 0xe5, 0x74, 0x34, 0xe1, 0xe3, 0x59, 0xa6, 0xc7, 0x60,
-	0x01, 0xef, 0x39, 0x35, 0xf3, 0xb5, 0xca, 0x93, 0x7d, 0x56, 0x4a, 0x05, 0xd4, 0x55, 0x8f, 0x24,
-	0x4d, 0x01, 0x02, 0x5c, 0x4b, 0xd7, 0x5d, 0x50, 0x4f, 0x04, 0x80, 0xb8, 0xe7, 0x94, 0x69, 0x49,
-	0x99, 0x52, 0x60, 0x99, 0x95, 0xa0, 0x4c, 0xb8, 0xed, 0x0c, 0xc1, 0x94, 0x60, 0x68, 0xc1, 0x0c,
-	0xf7, 0xef, 0xd1, 0x2a, 0x2f, 0xb8, 0x65, 0x39, 0xd5, 0x4c, 0x48, 0xe5, 0xe0, 0xc0, 0x1e, 0x6f,
-	0xc4, 0xd3, 0x6c, 0xcc, 0xca, 0x30, 0x28, 0x6d, 0xc6, 0xf8, 0x66, 0x6d, 0xef, 0x3b, 0x71, 0xc0,
-	0x47, 0x13, 0x6e, 0x6c, 0xda, 0x8f, 0x0f, 0x6a, 0xaa, 0xd1, 0xa0, 0x0c, 0xc7, 0x57, 0x71, 0xc3,
-	0x9b, 0x8f, 0xd0, 0x19, 0xba, 0xd8, 0xed, 0x1e, 0x66, 0xf5, 0xed, 0x32, 0xcf, 0xf7, 0x76, 0xe6,
-	0x1f, 0xad, 0xe8, 0xe5, 0xfb, 0xb5, 0x83, 0x06, 0xc1, 0xd0, 0x7d, 0x40, 0xf1, 0xb6, 0x1b, 0x89,
-	0xa7, 0x71, 0xc3, 0x63, 0x38, 0xdd, 0xb4, 0xff, 0x4e, 0x92, 0x9c, 0xff, 0xcb, 0xf8, 0x5c, 0x69,
-	0xfb, 0xf1, 0xed, 0xeb, 0x79, 0xab, 0x85, 0x4f, 0xa9, 0x14, 0x4a, 0x5a, 0x4e, 0xff, 0xdc, 0xb8,
-	0x77, 0x3d, 0x5f, 0x12, 0xb4, 0x58, 0x12, 0xf4, 0xb9, 0x24, 0xe8, 0x69, 0x45, 0xa2, 0xc5, 0x8a,
-	0x44, 0xef, 0x2b, 0x12, 0xdd, 0xb6, 0x85, 0xb4, 0x77, 0x93, 0x22, 0x1b, 0x42, 0x59, 0x1f, 0x31,
-	0x0d, 0xa7, 0x9d, 0x69, 0x6e, 0x8a, 0x86, 0xfb, 0xb3, 0xcb, 0x9f, 0x00, 0x00, 0x00, 0xff, 0xff,
-	0xd3, 0xcb, 0x83, 0xc8, 0xf1, 0x01, 0x00, 0x00,
+	// 475 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x93, 0x4f, 0x6b, 0x13, 0x41,
+	0x18, 0xc6, 0xb3, 0x16, 0x53, 0x3b, 0x8a, 0x7f, 0xc6, 0x22, 0xe9, 0xaa, 0x9b, 0xb2, 0x52, 0x88,
+	0x4b, 0xd9, 0x31, 0xd1, 0x1e, 0x14, 0x44, 0x28, 0xfd, 0x00, 0x31, 0xde, 0xbc, 0x94, 0xd9, 0x75,
+	0x98, 0x2c, 0xed, 0xce, 0x3b, 0xdd, 0x99, 0x2c, 0xad, 0xe2, 0xc5, 0x4f, 0x20, 0xf8, 0x01, 0x7a,
+	0xf5, 0xe8, 0xc7, 0xe8, 0xb1, 0xe0, 0xc5, 0x93, 0x48, 0x22, 0xf8, 0x35, 0x24, 0x33, 0x13, 0xe2,
+	0xd6, 0x4d, 0xc9, 0x65, 0x32, 0xf3, 0xe6, 0x79, 0x9e, 0xdf, 0x3b, 0xef, 0xb0, 0xc8, 0xe7, 0x02,
+	0xca, 0x9c, 0xd8, 0xb5, 0xec, 0x92, 0xa3, 0x11, 0x2b, 0x4e, 0x62, 0x59, 0x80, 0x06, 0x7c, 0xd3,
+	0x54, 0x63, 0xbb, 0x96, 0x5d, 0xff, 0x0e, 0xcd, 0x33, 0x01, 0xc4, 0xac, 0x56, 0xe2, 0x47, 0x29,
+	0xa8, 0x1c, 0x14, 0x49, 0xa8, 0x62, 0xd6, 0x4b, 0xca, 0x6e, 0xc2, 0x34, 0xed, 0x12, 0x49, 0x79,
+	0x26, 0xa8, 0xce, 0x40, 0x38, 0xed, 0xfd, 0x0b, 0x28, 0x49, 0x0b, 0x9a, 0x2b, 0xf7, 0xe7, 0x3a,
+	0x07, 0x0e, 0x66, 0x4b, 0xa6, 0x3b, 0x57, 0x7d, 0xc0, 0x01, 0xf8, 0x21, 0x23, 0x54, 0x66, 0x84,
+	0x0a, 0x01, 0xda, 0xe4, 0x39, 0x4f, 0xb8, 0x8e, 0xf0, 0xeb, 0x29, 0xb2, 0x6f, 0x82, 0x06, 0xec,
+	0x68, 0xc4, 0x94, 0x0e, 0xfb, 0xe8, 0x6e, 0xa5, 0xaa, 0x24, 0x08, 0xc5, 0xf0, 0x73, 0xd4, 0xb4,
+	0xc0, 0x96, 0xb7, 0xe9, 0x75, 0xae, 0xf7, 0xee, 0xc5, 0xd5, 0xdb, 0xc5, 0x56, 0xbf, 0xbb, 0x76,
+	0xf6, 0xb3, 0xdd, 0xf8, 0xfa, 0xe7, 0x5b, 0xe4, 0x0d, 0x9c, 0x21, 0xdc, 0x46, 0xb7, 0x4c, 0xe2,
+	0x1e, 0xa4, 0x0e, 0x82, 0x37, 0xd0, 0x35, 0x79, 0xc0, 0xf7, 0x25, 0xd5, 0x43, 0x93, 0xb7, 0x36,
+	0x58, 0x95, 0x07, 0xbc, 0x4f, 0xf5, 0x30, 0xdc, 0x46, 0xb7, 0xe7, 0x6a, 0x07, 0x6f, 0xa1, 0xd5,
+	0x14, 0x84, 0x66, 0x42, 0xcf, 0xd4, 0xee, 0x18, 0xee, 0xa0, 0x96, 0x51, 0x0f, 0x18, 0x3d, 0xcc,
+	0xdf, 0x68, 0x28, 0x28, 0x67, 0x4b, 0x40, 0x76, 0xd0, 0x46, 0x8d, 0x6d, 0x4e, 0x53, 0xb6, 0x34,
+	0xb3, 0xb9, 0x63, 0xef, 0x74, 0x05, 0x5d, 0x35, 0x3e, 0x7c, 0x8c, 0x9a, 0xf6, 0xc2, 0x38, 0xbc,
+	0x38, 0x88, 0xff, 0x67, 0xea, 0x3f, 0xba, 0x54, 0x63, 0xb1, 0xe1, 0xd6, 0xa7, 0xef, 0xbf, 0xbf,
+	0x5c, 0x69, 0xe3, 0x87, 0x24, 0xe3, 0x22, 0xd3, 0x8c, 0xd4, 0xbe, 0x37, 0x7e, 0x8f, 0x56, 0xf6,
+	0x20, 0xc5, 0xed, 0xda, 0xc8, 0xf9, 0x88, 0xfd, 0xcd, 0xc5, 0x02, 0x07, 0x7c, 0x62, 0x80, 0x11,
+	0xee, 0x2c, 0x00, 0xbe, 0x83, 0x94, 0x7c, 0x98, 0x4d, 0xf0, 0x65, 0x14, 0x7d, 0xc4, 0xa7, 0x1e,
+	0xba, 0xf1, 0xef, 0xc8, 0x70, 0xa7, 0x16, 0x52, 0xf3, 0x18, 0xfe, 0xe3, 0x25, 0x94, 0xae, 0xaf,
+	0x17, 0xa6, 0xaf, 0x67, 0xb8, 0xb7, 0xa0, 0xaf, 0x62, 0x6a, 0xda, 0x77, 0x6f, 0x52, 0xed, 0x70,
+	0xf7, 0xd5, 0xd9, 0x38, 0xf0, 0xce, 0xc7, 0x81, 0xf7, 0x6b, 0x1c, 0x78, 0x9f, 0x27, 0x41, 0xe3,
+	0x7c, 0x12, 0x34, 0x7e, 0x4c, 0x82, 0xc6, 0xdb, 0x2d, 0x9e, 0xe9, 0xe1, 0x28, 0x89, 0x53, 0xc8,
+	0xab, 0xb9, 0xc7, 0xee, 0x57, 0x9f, 0x48, 0xa6, 0x92, 0xa6, 0xf9, 0x36, 0x9e, 0xfe, 0x0d, 0x00,
+	0x00, 0xff, 0xff, 0xfc, 0x8f, 0xc0, 0x9f, 0xd9, 0x03, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -159,6 +353,10 @@ const _ = grpc.SupportPackageIsVersion4
 type QueryClient interface {
 	// Parameters queries the parameters of the module.
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
+	// Doc queries the documentation by its package name.
+	Doc(ctx context.Context, in *QueryDocRequest, opts ...grpc.CallOption) (*QueryDocResponse, error)
+	// RealmStorage queries the realm storage by its package name.
+	RealmStorage(ctx context.Context, in *QueryRealmStorageRequest, opts ...grpc.CallOption) (*QueryRealmStorageResponse, error)
 }
 
 type queryClient struct {
@@ -178,10 +376,32 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 	return out, nil
 }
 
+func (c *queryClient) Doc(ctx context.Context, in *QueryDocRequest, opts ...grpc.CallOption) (*QueryDocResponse, error) {
+	out := new(QueryDocResponse)
+	err := c.cc.Invoke(ctx, "/gnovm.gnovm.v1.Query/Doc", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) RealmStorage(ctx context.Context, in *QueryRealmStorageRequest, opts ...grpc.CallOption) (*QueryRealmStorageResponse, error) {
+	out := new(QueryRealmStorageResponse)
+	err := c.cc.Invoke(ctx, "/gnovm.gnovm.v1.Query/RealmStorage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Parameters queries the parameters of the module.
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
+	// Doc queries the documentation by its package name.
+	Doc(context.Context, *QueryDocRequest) (*QueryDocResponse, error)
+	// RealmStorage queries the realm storage by its package name.
+	RealmStorage(context.Context, *QueryRealmStorageRequest) (*QueryRealmStorageResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -190,6 +410,12 @@ type UnimplementedQueryServer struct {
 
 func (*UnimplementedQueryServer) Params(ctx context.Context, req *QueryParamsRequest) (*QueryParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Params not implemented")
+}
+func (*UnimplementedQueryServer) Doc(ctx context.Context, req *QueryDocRequest) (*QueryDocResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Doc not implemented")
+}
+func (*UnimplementedQueryServer) RealmStorage(ctx context.Context, req *QueryRealmStorageRequest) (*QueryRealmStorageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RealmStorage not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -214,6 +440,42 @@ func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_Doc_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryDocRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).Doc(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/gnovm.gnovm.v1.Query/Doc",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).Doc(ctx, req.(*QueryDocRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_RealmStorage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryRealmStorageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).RealmStorage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/gnovm.gnovm.v1.Query/RealmStorage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).RealmStorage(ctx, req.(*QueryRealmStorageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Query_serviceDesc = _Query_serviceDesc
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "gnovm.gnovm.v1.Query",
@@ -222,6 +484,14 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Params",
 			Handler:    _Query_Params_Handler,
+		},
+		{
+			MethodName: "Doc",
+			Handler:    _Query_Doc_Handler,
+		},
+		{
+			MethodName: "RealmStorage",
+			Handler:    _Query_RealmStorage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -284,6 +554,126 @@ func (m *QueryParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryDocRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryDocRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryDocRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.PkgPath) > 0 {
+		i -= len(m.PkgPath)
+		copy(dAtA[i:], m.PkgPath)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.PkgPath)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryDocResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryDocResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryDocResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Content) > 0 {
+		i -= len(m.Content)
+		copy(dAtA[i:], m.Content)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Content)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryRealmStorageRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryRealmStorageRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryRealmStorageRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.PkgPath) > 0 {
+		i -= len(m.PkgPath)
+		copy(dAtA[i:], m.PkgPath)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.PkgPath)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryRealmStorageResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryRealmStorageResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryRealmStorageResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Storage) > 0 {
+		i -= len(m.Storage)
+		copy(dAtA[i:], m.Storage)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Storage)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -312,6 +702,58 @@ func (m *QueryParamsResponse) Size() (n int) {
 	_ = l
 	l = m.Params.Size()
 	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryDocRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.PkgPath)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryDocResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Content)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryRealmStorageRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.PkgPath)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryRealmStorageResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Storage)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
 	return n
 }
 
@@ -432,6 +874,334 @@ func (m *QueryParamsResponse) Unmarshal(dAtA []byte) error {
 			if err := m.Params.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryDocRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryDocRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryDocRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PkgPath", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PkgPath = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryDocResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryDocResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryDocResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Content", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Content = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryRealmStorageRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryRealmStorageRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryRealmStorageRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PkgPath", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PkgPath = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryRealmStorageResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryRealmStorageResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryRealmStorageResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Storage", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Storage = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

@@ -1,11 +1,12 @@
 syntax = "proto3";
+
 package gnovm.gnovm.v1;
 
 import "amino/amino.proto";
-import "gogoproto/gogo.proto";
-import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "gnovm/gnovm/v1/params.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
 
 option go_package = "github.com/ignite/gnovm/x/gnovm/types";
 
@@ -14,6 +15,16 @@ service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/ignite/gnovm/gnovm/v1/params";
+  }
+
+  // Doc queries the documentation by its package name.
+  rpc Doc(QueryDocRequest) returns (QueryDocResponse) {
+    option (google.api.http).get = "/ignite/gnovm/gnovm/v1/doc/{pkg_path=**}";
+  }
+
+  // RealmStorage queries the realm storage by its package name.
+  rpc RealmStorage(QueryRealmStorageRequest) returns (QueryRealmStorageResponse) {
+    option (google.api.http).get = "/ignite/gnovm/gnovm/v1/realm_storage/{pkg_path=**}";
   }
 }
 
@@ -27,4 +38,24 @@ message QueryParamsResponse {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+}
+
+// QueryDocRequest defines the QueryDocRequest message.
+message QueryDocRequest {
+  string pkg_path = 1;
+}
+
+// QueryDocResponse defines the QueryDocResponse message.
+message QueryDocResponse {
+  string content = 1;
+}
+
+// QueryRealmStorageRequest defines the QueryRealmStorageRequest message.
+message QueryRealmStorageRequest {
+  string pkg_path = 1;
+}
+
+// QueryRealmStorageResponse defines the QueryRealmStorageResponse message.
+message QueryRealmStorageResponse {
+    string storage = 1;
 }
