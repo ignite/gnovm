@@ -80,7 +80,15 @@ func (v vmBankKeeper) SendCoinsUnrestricted(ctx gnosdk.Context, fromAddr crypto.
 
 // SubtractCoins implements vm.BankKeeperI.
 func (v vmBankKeeper) SubtractCoins(ctx gnosdk.Context, addr crypto.Address, amt std.Coins) (std.Coins, error) {
-	panic("unimplemented")
+	balances := v.bankKeeper.GetAllBalances(v.vmParams.sdkCtx, addr.Bytes())
+
+	sentCoins := types.SDKCoinsFromStdCoins(amt)
+	if err := v.bankKeeper.SendCoinsFromAccountToModule(v.vmParams.sdkCtx, addr.Bytes(), types.ModuleName, sentCoins); err != nil {
+		return nil, err
+	}
+
+	subBalances := balances.Sub(sentCoins...)
+	return types.StdCoinsFromSDKCoins(subBalances), nil
 }
 
 var _ vm.ParamsKeeperI = (*vmKeeperParams)(nil)

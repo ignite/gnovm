@@ -94,6 +94,10 @@ func (m *mockBankKeeper) SendCoins(_ context.Context, from, to sdk.AccAddress, a
 	return nil
 }
 
+func (m *mockBankKeeper) SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
+	panic("not implemented")
+}
+
 func initFixture(t *testing.T) *fixture {
 	t.Helper()
 
