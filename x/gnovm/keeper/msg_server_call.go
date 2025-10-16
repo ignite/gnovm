@@ -22,6 +22,15 @@ func (k msgServer) Call(ctx context.Context, msg *types.MsgCall) (resp *types.Ms
 		return nil, errorsmod.Wrap(err, "failed to initialize VM")
 	}
 
+	var committed bool
+	defer func() {
+		if !committed && err == nil {
+			// Commit the transaction store on successful execution
+			k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
+			committed = true
+		}
+	}()
+
 	vmMsg := vm.MsgCall{
 		Caller:     types.ToCryptoAddress(callerBytes),
 		Send:       types.StdCoinsFromSDKCoins(msg.Send),
@@ -43,6 +52,10 @@ func (k msgServer) Call(ctx context.Context, msg *types.MsgCall) (resp *types.Ms
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to call VM")
 	}
+
+	// Commit the transaction store before returning success
+	k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
+	committed = true
 
 	return &types.MsgCallResponse{
 		Result: result,

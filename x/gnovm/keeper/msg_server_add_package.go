@@ -25,6 +25,15 @@ func (k msgServer) AddPackage(ctx context.Context, msg *types.MsgAddPackage) (*t
 		return nil, errorsmod.Wrap(err, "failed to initialize VM")
 	}
 
+	var committed bool
+	defer func() {
+		if !committed && err == nil {
+			// Commit the transaction store on successful execution
+			k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
+			committed = true
+		}
+	}()
+
 	send := types.StdCoinsFromSDKCoins(msg.Deposit)
 	maxDep := types.StdCoinsFromSDKCoins(sdk.NewCoins(msg.MaxDeposit))
 
@@ -45,6 +54,10 @@ func (k msgServer) AddPackage(ctx context.Context, msg *types.MsgAddPackage) (*t
 	if err := k.VMKeeper.AddPackage(gnoCtx, vmMsg); err != nil {
 		return nil, errorsmod.Wrap(err, "failed to add package")
 	}
+
+	// Commit the transaction store before returning success
+	k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
+	committed = true
 
 	return &types.MsgAddPackageResponse{}, nil
 }

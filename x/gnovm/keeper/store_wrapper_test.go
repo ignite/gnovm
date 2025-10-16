@@ -202,8 +202,11 @@ func TestGnovmMultiStore_MultiCacheWrap(t *testing.T) {
 	cachedStore := multiStore.MultiCacheWrap()
 	require.NotNil(t, cachedStore)
 
-	// For our simple implementation, it should return the same instance
-	assert.Equal(t, multiStore, cachedStore)
+	// Should return a different cached instance
+	assert.Assert(t, multiStore != cachedStore)
+	// Should be the same type
+	_, ok := cachedStore.(*gnovmMultiStore)
+	assert.Assert(t, ok)
 }
 
 func TestGnovmMultiStore_MultiWrite(t *testing.T) {

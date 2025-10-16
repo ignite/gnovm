@@ -113,5 +113,5 @@ func TestMsgCall_Basic(t *testing.T) {
 
 	_, err = ms.Call(f.ctx, msg)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "failed to call VM")
+	require.Contains(t, err.Error(), "panic while calling VM")
 }

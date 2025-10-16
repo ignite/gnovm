@@ -24,6 +24,15 @@ func (k msgServer) Run(ctx context.Context, msg *types.MsgRun) (*types.MsgRunRes
 		return nil, errorsmod.Wrap(err, "failed to initialize VM")
 	}
 
+	var committed bool
+	defer func() {
+		if !committed && err == nil {
+			// Commit the transaction store on successful execution
+			k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
+			committed = true
+		}
+	}()
+
 	send := types.StdCoinsFromSDKCoins(msg.Send)
 	maxDep := types.StdCoinsFromSDKCoins(sdk.NewCoins(msg.MaxDeposit))
 
@@ -46,6 +55,10 @@ func (k msgServer) Run(ctx context.Context, msg *types.MsgRun) (*types.MsgRunRes
 	); err != nil {
 		return nil, errorsmod.Wrap(err, "failed to run VM")
 	}
+
+	// Commit the transaction store before returning success
+	k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
+	committed = true
 
 	return &types.MsgRunResponse{}, nil
 }

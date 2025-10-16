@@ -170,14 +170,18 @@ func (k *Keeper) BuildGnoContext(sdkCtx sdk.Context) (gnosdk.Context, error) {
 		return gnosdk.Context{}, fmt.Errorf("invalid exec mode: %v", sdkCtx.ExecMode())
 	}
 
-	// Create MultiStore wrapper for transaction
-	ms := NewGnovmMultiStore(
+	// Create MultiStore wrapper for transaction with forced fresh isolation
+	// Use cache wrapping to ensure complete isolation from previous operations
+	baseMS := NewGnovmMultiStore(
 		k.logger,
 		k.storeService,
 		k.memStoreService,
 		gnostore.NewStoreKey(k.storeKey.Name()),
 		gnostore.NewStoreKey(k.memStoreKey.Name()),
 	)
+
+	// Force cache wrapping for complete isolation
+	ms := baseMS.MultiCacheWrap()
 
 	chainID := sdkCtx.ChainID()
 	if chainID == "" {

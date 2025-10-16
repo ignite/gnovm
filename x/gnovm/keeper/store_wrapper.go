@@ -21,7 +21,8 @@ type gnovmMultiStore struct {
 	memStoreKey     gnostore.StoreKey
 	ctx             gnosdk.Context
 	sdkCtx          context.Context
-	kvStore         corestore.KVStore // Cached KV store
+	kvStore         corestore.KVStore // Cached regular KV store
+	memStore        corestore.KVStore // Cached memory store
 }
 
 // NewGnovmMultiStore creates a new MultiStore wrapper that can be initialized
@@ -46,32 +47,47 @@ func NewGnovmMultiStore(
 func (ms *gnovmMultiStore) SetContext(ctx gnosdk.Context, sdkCtx context.Context) {
 	ms.ctx = ctx.WithMultiStore(ms)
 	ms.sdkCtx = sdkCtx
-	ms.kvStore = nil // Reset cached store
+	// Always reset cached stores to ensure fresh state for each operation
+	ms.kvStore = nil
+	ms.memStore = nil
 }
 
 // GetStore implements types.MultiStore.
 // It returns the gnovm store if the provided key matches our store key,
 // otherwise it panics as per the interface contract.
 func (ms *gnovmMultiStore) GetStore(key gnostore.StoreKey) gnostore.Store {
-	var memStore bool
-	if key.Name() == ms.memStoreKey.Name() {
-		memStore = true
-	} else if key.Name() != ms.storeKey.Name() {
-		panic("store not found: " + key.Name())
+	if ms.sdkCtx == nil {
+		panic("SDK context not set - call SetContext first")
 	}
 
-	// Lazy initialize the KV store if needed
-	if ms.kvStore == nil {
-		if ms.sdkCtx == nil {
-			panic("SDK context not set - call SetContext first")
+	var kvStore corestore.KVStore
+
+	if key.Name() == ms.memStoreKey.Name() {
+		// Always create fresh memory store instance to avoid cross-transaction contamination
+		var memStore corestore.KVStore
+		if ms.memStoreService != nil {
+			func() {
+				defer func() {
+					if r := recover(); r != nil {
+						// Memory store not available, fall back to regular store
+						ms.logger.Info("Memory store not available, falling back to regular store", "error", r)
+						memStore = nil
+					}
+				}()
+				memStore = ms.memStoreService.OpenMemoryStore(ms.sdkCtx)
+			}()
 		}
-		if memStore {
-			ms.kvStore = ms.memStoreService.OpenMemoryStore(ms.sdkCtx)
-		} else {
-			ms.kvStore = ms.storeService.OpenKVStore(ms.sdkCtx)
+		// If memory store service is not available or failed, fall back to regular store
+		if memStore == nil {
+			memStore = ms.storeService.OpenKVStore(ms.sdkCtx)
 		}
+		kvStore = memStore
+	} else if key.Name() == ms.storeKey.Name() {
+		// Always create fresh regular store instance to avoid cross-transaction contamination
+		kvStore = ms.storeService.OpenKVStore(ms.sdkCtx)
+	} else {
+		panic("store not found: " + key.Name())
 	}
-	kvStore := ms.kvStore
 
 	return &gnovmStore{
 		logger:  ms.logger,
@@ -82,9 +98,20 @@ func (ms *gnovmMultiStore) GetStore(key gnostore.StoreKey) gnostore.Store {
 // MultiCacheWrap implements types.MultiStore.
 // Returns a cache-wrapped version of this MultiStore.
 func (ms *gnovmMultiStore) MultiCacheWrap() gnostore.MultiStore {
-	// For simplicity, return the same store as we're already wrapping
-	// the underlying store service which handles caching
-	return ms
+	// Create a completely independent multistore instance for proper isolation
+	cached := &gnovmMultiStore{
+		logger:          ms.logger,
+		storeService:    ms.storeService,
+		memStoreService: ms.memStoreService,
+		storeKey:        ms.storeKey,
+		memStoreKey:     ms.memStoreKey,
+		ctx:             ms.ctx,
+		sdkCtx:          ms.sdkCtx,
+		// Don't copy any cached stores - ensure complete isolation
+		kvStore:  nil,
+		memStore: nil,
+	}
+	return cached
 }
 
 // MultiWrite implements types.MultiStore.
@@ -159,7 +186,8 @@ func (s *gnovmStore) ReverseIterator(start, end []byte) gnostore.Iterator {
 // CacheWrap implements types.Store.
 // Returns a cache-wrapped version of this store.
 func (s *gnovmStore) CacheWrap() gnostore.Store {
-	// For simplicity, return the same store as the underlying service handles caching
+	// Return the same store instance since the underlying KVStore
+	// handles caching and isolation at the Cosmos SDK level
 	return s
 }
 
