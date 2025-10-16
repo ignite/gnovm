@@ -15,20 +15,27 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				{
 					RpcMethod: "Params",
 					Use:       "params",
-					Short:     "Shows the parameters of the module",
+					Short:     "Shows the parameters of the module.",
 				},
 				{
-					RpcMethod:      "Doc",
-					Use:            "doc [pkg-path]",
-					Short:          "Query raw documentation from a package",
+					RpcMethod:      "Info",
+					Use:            "info [pkg-path]",
+					Short:          "Query raw info from a package.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "pkg_path"}},
 				},
 
 				{
 					RpcMethod:      "RealmStorage",
 					Use:            "realm-storage [pkg-path]",
-					Short:          "Query storage from a realm",
+					Short:          "Query storage from a realm.",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "pkg_path"}},
+				},
+
+				{
+					RpcMethod:      "Eval",
+					Use:            "eval [pkg-path] [expr]",
+					Short:          "Evaluates any expression in readonly mode and returns the results.",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "pkg_path"}, {ProtoField: "expr"}},
 				},
 
 				// this line is used by ignite scaffolding # autocli/query

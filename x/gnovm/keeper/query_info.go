@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"encoding/json"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -10,8 +11,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// RealmStorage returns the storage information for a given realm.
-func (q queryServer) RealmStorage(ctx context.Context, req *types.QueryRealmStorageRequest) (*types.QueryRealmStorageResponse, error) {
+// Info queries the package internal info by its package path.
+func (q queryServer) Info(ctx context.Context, req *types.QueryInfoRequest) (*types.QueryInfoResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
@@ -27,12 +28,15 @@ func (q queryServer) RealmStorage(ctx context.Context, req *types.QueryRealmStor
 		return nil, errorsmod.Wrap(err, "failed to initialize VM")
 	}
 
-	result, err := q.k.VMKeeper.QueryStorage(gnoCtx, req.PkgPath)
+	result, err := q.k.VMKeeper.QueryDoc(gnoCtx, req.PkgPath)
 	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to query realm storage")
+		return nil, errorsmod.Wrap(err, "failed to query package info")
 	}
 
-	return &types.QueryRealmStorageResponse{
-		Result: result,
-	}, nil
+	jsonBytes, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		return nil, errorsmod.Wrap(err, "failed to marshal package info")
+	}
+
+	return &types.QueryInfoResponse{Result: string(jsonBytes)}, nil
 }

@@ -17,14 +17,19 @@ service Query {
     option (google.api.http).get = "/ignite/gnovm/gnovm/v1/params";
   }
 
-  // Doc queries the documentation by its package name.
-  rpc Doc(QueryDocRequest) returns (QueryDocResponse) {
-    option (google.api.http).get = "/ignite/gnovm/gnovm/v1/doc/{pkg_path=**}";
+  // Info queries the realm/package internal info by its package name.
+  rpc Info(QueryInfoRequest) returns (QueryInfoResponse) {
+    option (google.api.http).get = "/ignite/gnovm/gnovm/v1/info/{pkg_path=**}";
   }
 
   // RealmStorage queries the realm storage by its package name.
   rpc RealmStorage(QueryRealmStorageRequest) returns (QueryRealmStorageResponse) {
     option (google.api.http).get = "/ignite/gnovm/gnovm/v1/realm_storage/{pkg_path=**}";
+  }
+
+  // Eval Queries a list of Eval items.
+  rpc Eval(QueryEvalRequest) returns (QueryEvalResponse) {
+    option (google.api.http).get = "/ignite/gnovm/gnovm/v1/eval/{pkg_path}";
   }
 }
 
@@ -40,14 +45,14 @@ message QueryParamsResponse {
   ];
 }
 
-// QueryDocRequest defines the QueryDocRequest message.
-message QueryDocRequest {
+// QueryInfoRequest defines the QueryInfoRequest message.
+message QueryInfoRequest {
   string pkg_path = 1;
 }
 
-// QueryDocResponse defines the QueryDocResponse message.
-message QueryDocResponse {
-  string content = 1;
+// QueryInfoResponse defines the QueryInfoResponse message.
+message QueryInfoResponse {
+  string result = 1;
 }
 
 // QueryRealmStorageRequest defines the QueryRealmStorageRequest message.
@@ -57,5 +62,16 @@ message QueryRealmStorageRequest {
 
 // QueryRealmStorageResponse defines the QueryRealmStorageResponse message.
 message QueryRealmStorageResponse {
-    string storage = 1;
+  string result = 1;
+}
+
+// QueryEvalRequest defines the QueryEvalRequest message.
+message QueryEvalRequest {
+  string pkg_path = 1;
+  string expr = 2;
+}
+
+// QueryEvalResponse defines the QueryEvalResponse message.
+message QueryEvalResponse {
+  string result = 1;
 }

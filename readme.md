@@ -11,11 +11,23 @@ To install the GnoVM module, please follow the instructions below:
 
 ## Usage
 
+### Add Realm / Package
+
 ```bash
-gnovmd tx gnovm add-package gno.land/r/demo/counter github.com/gno/examples/gno.land/r/demo/counter 5000stake --from alice
+gnovmd tx gnovm add-package github.com/gno/examples/gno.land/r/demo/counter 5000stake --from alice
 ```
 
-> TBD
+### Call Realm / Package
+
+```bash
+gnovmd tx gnovm call 1000stake gno.land/r/demo/counter Increment --from alice
+```
+
+### Run Realm / Package
+
+```bash
+gnovmd tx gnovm run github.com/gno/examples/gno.land/r/demo/counter 5000stake --from alice
+```
 
 ## Scaffolded with Ignite
 

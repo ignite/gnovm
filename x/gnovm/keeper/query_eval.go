@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"encoding/json"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -11,14 +10,17 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// Doc queries the documentation by its package path.
-func (q queryServer) Doc(ctx context.Context, req *types.QueryDocRequest) (*types.QueryDocResponse, error) {
+func (q queryServer) Eval(ctx context.Context, req *types.QueryEvalRequest) (*types.QueryEvalResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
 	if req.PkgPath == "" {
 		return nil, status.Error(codes.InvalidArgument, "package path cannot be empty")
+	}
+
+	if req.Expr == "" {
+		return nil, status.Error(codes.InvalidArgument, "expression cannot be empty")
 	}
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
@@ -28,15 +30,10 @@ func (q queryServer) Doc(ctx context.Context, req *types.QueryDocRequest) (*type
 		return nil, errorsmod.Wrap(err, "failed to initialize VM")
 	}
 
-	result, err := q.k.VMKeeper.QueryDoc(gnoCtx, req.PkgPath)
+	result, err := q.k.VMKeeper.QueryEval(gnoCtx, req.PkgPath, req.Expr)
 	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to query package documentation")
+		return nil, errorsmod.Wrap(err, "failed to query package info")
 	}
 
-	jsonBytes, err := json.Marshal(result)
-	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to marshal package documentation")
-	}
-
-	return &types.QueryDocResponse{Content: string(jsonBytes)}, nil
+	return &types.QueryEvalResponse{Result: result}, nil
 }
