@@ -21,7 +21,7 @@ type gnoTransactionsPost struct {
 
 func (gtp *gnoTransactionsPost) PostHandle(ctx sdk.Context, tx sdk.Tx, simulate, success bool, next sdk.PostHandler) (newCtx sdk.Context, err error) {
 	if success {
-		gnoCtx, err := gtp.k.BuildGnoContextWithStore(ctx)
+		gnoCtx, err := gtp.k.BuildGnoContext(ctx)
 		if err != nil {
 			return ctx, err
 		}

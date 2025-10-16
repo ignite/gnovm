@@ -20,11 +20,7 @@ func (k msgServer) AddPackage(ctx context.Context, msg *types.MsgAddPackage) (*t
 	}
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	if err := (&k).initializeVMKeeper(sdkCtx); err != nil {
-		return nil, errorsmod.Wrap(err, "failed to initialize VM")
-	}
-
-	gnoCtx, err := k.BuildGnoContextWithStore(sdkCtx)
+	gnoCtx, err := k.BuildGnoContext(sdkCtx)
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to initialize VM")
 	}

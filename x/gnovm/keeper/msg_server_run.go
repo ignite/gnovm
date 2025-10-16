@@ -19,8 +19,7 @@ func (k msgServer) Run(ctx context.Context, msg *types.MsgRun) (*types.MsgRunRes
 	}
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	gnoCtx, err := k.BuildGnoContextWithStore(sdkCtx)
+	gnoCtx, err := k.BuildGnoContext(sdkCtx)
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to initialize VM")
 	}

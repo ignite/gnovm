@@ -17,18 +17,12 @@ const defaultStdLibs = "github.com/gnolang/gno/gnovm/stdlibs"
 
 // InitGenesis initializes the module's state from a provided genesis state.
 func (k *Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) error {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	if err := k.Params.Set(ctx, genState.Params); err != nil {
 		return err
 	}
 
-	// Ensure VMKeeper is initialized before using it
-	if err := k.initializeVMKeeper(sdkCtx); err != nil {
-		return err
-	}
-
-	// Create a safe gno context for genesis operations
-	gnoCtx, err := k.BuildGnoContextWithStore(sdkCtx)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	gnoCtx, err := k.BuildGnoContext(sdkCtx)
 	if err != nil {
 		return err
 	}
@@ -66,14 +60,8 @@ func (k *Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) e
 
 // ExportGenesis returns the module's exported genesis.
 func (k *Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) {
-	// Ensure VMKeeper is initialized before using it
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	if err := k.initializeVMKeeper(sdkCtx); err != nil {
-		return nil, err
-	}
-
-	// Create a safe gno context for genesis operations
-	gnoCtx, err := k.BuildGnoContextWithStore(sdkCtx)
+	gnoCtx, err := k.BuildGnoContext(sdkCtx)
 	if err != nil {
 		return nil, err
 	}

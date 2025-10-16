@@ -150,10 +150,10 @@ func (k *Keeper) initializeVMKeeper(sdkCtx sdk.Context) error {
 	return nil
 }
 
-// BuildGnoContextWithStore initializes the VM (if needed), creates a Gno context using
+// BuildGnoContext initializes the VM (if needed), creates a Gno context using
 // the MultiStore wrapper bound to the provided sdkCtx, and returns a per-tx context
 // with a transaction store attached.
-func (k *Keeper) BuildGnoContextWithStore(sdkCtx sdk.Context) (gnosdk.Context, error) {
+func (k *Keeper) BuildGnoContext(sdkCtx sdk.Context) (gnosdk.Context, error) {
 	if err := k.initializeVMKeeper(sdkCtx); err != nil {
 		return gnosdk.Context{}, err
 	}
@@ -186,7 +186,7 @@ func (k *Keeper) BuildGnoContextWithStore(sdkCtx sdk.Context) (gnosdk.Context, e
 
 	gnoCtx := gnosdk.NewContext(
 		mode,
-		ms, // MultiStore provided by our wrapper
+		ms,
 		&bft.Header{ChainID: chainID},
 		types.NewSlogFromCosmosLogger(k.logger),
 	)

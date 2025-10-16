@@ -35,11 +35,7 @@ func (k msgServer) UpdateParams(ctx context.Context, req *types.MsgUpdateParams)
 	}
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	if err := k.initializeVMKeeper(sdkCtx); err != nil {
-		return nil, err
-	}
-
-	gnoCtx, err := k.BuildGnoContextWithStore(sdkCtx)
+	gnoCtx, err := k.BuildGnoContext(sdkCtx)
 	if err != nil {
 		return nil, err
 	}

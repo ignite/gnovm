@@ -25,7 +25,7 @@ func (q queryServer) Eval(ctx context.Context, req *types.QueryEvalRequest) (*ty
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	gnoCtx, err := q.k.BuildGnoContextWithStore(sdkCtx)
+	gnoCtx, err := q.k.BuildGnoContext(sdkCtx)
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to initialize VM")
 	}
