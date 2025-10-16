@@ -24,7 +24,6 @@ func (q queryServer) Eval(ctx context.Context, req *types.QueryEvalRequest) (*ty
 	}
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
 	gnoCtx, err := q.k.BuildGnoContext(sdkCtx)
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to initialize VM")
@@ -32,7 +31,7 @@ func (q queryServer) Eval(ctx context.Context, req *types.QueryEvalRequest) (*ty
 
 	result, err := q.k.VMKeeper.QueryEval(gnoCtx, req.PkgPath, req.Expr)
 	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to query package info")
+		return nil, errorsmod.Wrap(err, "failed to query package eval")
 	}
 
 	return &types.QueryEvalResponse{Result: result}, nil
