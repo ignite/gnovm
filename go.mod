@@ -5,7 +5,8 @@ go 1.25.0
 replace (
 	// fix upstream GHSA-h395-qcrw-5vmq vulnerability.
 	github.com/gin-gonic/gin => github.com/gin-gonic/gin v1.9.1
-	github.com/gnolang/gno => /home/julien/projects/julienrbrt/gno
+	// https://github.com/gnolang/gno/pull/4852
+	github.com/gnolang/gno => github.com/julienrbrt/gno v0.0.0-20251016194523-cc39946f0d00
 	// replace broken goleveldb
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	// replace broken vanity url
