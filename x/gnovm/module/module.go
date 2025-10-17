@@ -72,6 +72,8 @@ func (AppModule) RegisterLegacyAminoCodec(*codec.LegacyAmino) {}
 
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the module.
 func (AppModule) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
+	runtime.SetHTTPBodyMarshaler(mux) // ensures http body are properly rendered.
+
 	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)); err != nil {
 		panic(err)
 	}

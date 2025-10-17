@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -24,7 +25,7 @@ func (q queryServer) RealmStorage(ctx context.Context, req *types.QueryRealmStor
 
 	gnoCtx, err := q.k.BuildGnoContext(sdkCtx)
 	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to initialize VM")
+		return nil, fmt.Errorf("failed to initialize VM: %w", err)
 	}
 
 	result, err := q.k.VMKeeper.QueryStorage(gnoCtx, req.PkgPath)

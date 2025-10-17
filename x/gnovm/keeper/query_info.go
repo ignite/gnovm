@@ -3,8 +3,8 @@ package keeper
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
-	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ignite/gnovm/x/gnovm/types"
 	"google.golang.org/grpc/codes"
@@ -25,17 +25,17 @@ func (q queryServer) Info(ctx context.Context, req *types.QueryInfoRequest) (*ty
 
 	gnoCtx, err := q.k.BuildGnoContext(sdkCtx)
 	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to initialize VM")
+		return nil, fmt.Errorf("failed to initialize VM: %w", err)
 	}
 
 	result, err := q.k.VMKeeper.QueryDoc(gnoCtx, req.PkgPath)
 	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to query package info")
+		return nil, fmt.Errorf("failed to query package info: %w", err)
 	}
 
 	jsonBytes, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to marshal package info")
+		return nil, fmt.Errorf("failed to marshal package info: %w", err)
 	}
 
 	return &types.QueryInfoResponse{Result: string(jsonBytes)}, nil

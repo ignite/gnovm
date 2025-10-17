@@ -7,6 +7,7 @@ import "cosmos/base/query/v1beta1/pagination.proto";
 import "gnovm/gnovm/v1/params.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
+import "google/api/httpbody.proto";
 
 option go_package = "github.com/ignite/gnovm/x/gnovm/types";
 
@@ -27,9 +28,14 @@ service Query {
     option (google.api.http).get = "/ignite/gnovm/gnovm/v1/realm_storage/{pkg_path=**}";
   }
 
-  // Eval Queries a list of Eval items.
+  // Eval evaluates the given expression to the package.
   rpc Eval(QueryEvalRequest) returns (QueryEvalResponse) {
-    option (google.api.http).get = "/ignite/gnovm/gnovm/v1/eval/{pkg_path}";
+    option (google.api.http).get = "/ignite/gnovm/gnovm/v1/eval/{pkg_path=**}";
+  }
+
+  // Render calls render the given template to the package.
+  rpc Render(QueryRenderRequest) returns (google.api.HttpBody) {
+    option (google.api.http).get = "/ignite/gnovm/gnovm/v1/render/{pkg_path=**}";
   }
 }
 
@@ -74,4 +80,10 @@ message QueryEvalRequest {
 // QueryEvalResponse defines the QueryEvalResponse message.
 message QueryEvalResponse {
   string result = 1;
+}
+
+// QueryRenderRequest defines the QueryRenderRequest message.
+message QueryRenderRequest {
+    string pkg_path = 1;
+    repeated string args = 2;
 }

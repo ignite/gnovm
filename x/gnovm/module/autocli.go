@@ -38,6 +38,16 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "pkg_path"}, {ProtoField: "expr"}},
 				},
 
+				{
+					RpcMethod: "Render",
+					Use:       "render [pkg-path] <args>",
+					Short:     "Queries Render method on the contract given the package path and arguments.",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "pkg_path"},
+						{ProtoField: "args", Varargs: true},
+					},
+				},
+
 				// this line is used by ignite scaffolding # autocli/query
 			},
 		},
