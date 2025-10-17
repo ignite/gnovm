@@ -41,6 +41,16 @@ gnovmd tx gnovm call 1stake gno.land/r/demo/counter Increment --from alice
 gnovmd tx gnovm run github.com/gno/examples/gno.land/r/demo/counter 5000stake --from alice
 ```
 
+### Render Realm / Package
+
+You can either query the `Render` function on the realm via cli:
+
+```bash
+gnovmd eval gno.land/r/demo/counter 'Render("")'
+```
+
+Or directly access its RPC endpoint on your node: <http://localhost:1317/ignite/gnovm/gnovm/v1/render/gno.land/r/demo/counter>
+
 ## Scaffolded with Ignite
 
 This repo has been scaffolded with Ignite.
