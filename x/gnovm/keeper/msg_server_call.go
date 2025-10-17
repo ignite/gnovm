@@ -30,12 +30,15 @@ func (k msgServer) Call(ctx context.Context, msg *types.MsgCall) (resp *types.Ms
 		Func:       msg.Function,
 		Args:       msg.Args,
 	}
-
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("panic while calling VM: %v", r)
+		} else {
+			// this commits the changes to the module store (that is only committed later)
+			k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
 		}
 	}()
+
 	result, err := k.VMKeeper.Call(
 		gnoCtx,
 		vmMsg,

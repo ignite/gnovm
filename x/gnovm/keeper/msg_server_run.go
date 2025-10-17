@@ -47,5 +47,8 @@ func (k msgServer) Run(ctx context.Context, msg *types.MsgRun) (*types.MsgRunRes
 		return nil, errorsmod.Wrap(err, "failed to run VM")
 	}
 
+	// this commits the changes to the module store (that is only committed later)
+	k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
+
 	return &types.MsgRunResponse{}, nil
 }

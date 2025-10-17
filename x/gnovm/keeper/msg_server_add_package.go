@@ -46,5 +46,8 @@ func (k msgServer) AddPackage(ctx context.Context, msg *types.MsgAddPackage) (*t
 		return nil, errorsmod.Wrap(err, "failed to add package")
 	}
 
+	// this commits the changes to the module store (that is only committed later)
+	k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
+
 	return &types.MsgAddPackageResponse{}, nil
 }
