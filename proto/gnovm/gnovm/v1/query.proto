@@ -84,6 +84,6 @@ message QueryEvalResponse {
 
 // QueryRenderRequest defines the QueryRenderRequest message.
 message QueryRenderRequest {
-    string pkg_path = 1;
-    repeated string args = 2;
+  string pkg_path = 1;
+  repeated string args = 2;
 }

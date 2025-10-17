@@ -3,6 +3,7 @@ package types
 import (
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 )
@@ -10,6 +11,7 @@ import (
 var (
 	defaultDepositCost int64 = 100
 	defaultStorageCost int64 = 1
+	moduleAccountAddr        = authtypes.NewModuleAddress(ModuleName)
 )
 
 // DefaultParams returns the default set of parameters.
@@ -20,21 +22,13 @@ func DefaultParams() Params {
 		ChainDomain:         defaultVmParams.ChainDomain,
 		DefaultDeposit:      sdk.NewCoin(sdk.DefaultBondDenom, math.NewInt(defaultDepositCost)).String(),
 		StoragePrice:        sdk.NewCoin(sdk.DefaultBondDenom, math.NewInt(defaultStorageCost)).String(),
-		StorageFeeCollector: defaultVmParams.StorageFeeCollector[:],
+		StorageFeeCollector: moduleAccountAddr,
 	}
 }
 
 // Validate validates the set of params.
 func (p Params) Validate() error {
-	vmParams := vm.Params{
-		SysNamesPkgPath:     p.SysnamesPkgpath,
-		ChainDomain:         p.ChainDomain,
-		DefaultDeposit:      p.DefaultDeposit,
-		StoragePrice:        p.StoragePrice,
-		StorageFeeCollector: ToCryptoAddress(p.StorageFeeCollector),
-	}
-
-	return vmParams.Validate()
+	return p.ToVmParams().Validate()
 }
 
 // ToVmParams converts the Params to vm.Params.
