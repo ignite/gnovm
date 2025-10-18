@@ -23,17 +23,6 @@ The [Ignite GnoVM App](https://github.com/ignite/apps/tree/main/gnovm) simplifie
 
 ## Usage
 
-### Start a localnet
-
-The following command runs a single node locally, with the home located in
-`~/.gnovm-localnet`.
-
-```bash
-make localnet-start
-```
-
-To target the node, use `./build/gnovmd --home ~/.gnovm-localnet ...`.
-
 ### Add Realm / Package
 
 ```bash
