@@ -118,8 +118,8 @@ localnet-start: build
 	$(localnetd) config set client keyring-backend test
 	$(localnetd) keys add val
 	$(localnetd) genesis add-genesis-account val 1000000$(DENOM)
-	$(localnetd) keys add user
-	$(localnetd) genesis add-genesis-account user 1000000$(DENOM)
+	$(localnetd) keys add alice
+	$(localnetd) genesis add-genesis-account alice 1000000$(DENOM)
 	$(localnetd) genesis gentx val 1000000$(DENOM)
 	$(localnetd) genesis collect-gentxs
 	# Set gas prices
