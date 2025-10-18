@@ -1,6 +1,7 @@
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 COMMIT := $(shell git log -1 --format='%H')
 APPNAME := gnovm
+DENOM := stake
 
 # do not override user values
 ifeq (,$(VERSION))
@@ -51,13 +52,17 @@ test: govet govulncheck test-unit
 
 all: install
 
+build: 
+	@echo "--> building ./build/$(APPNAME)d"
+	@go build $(BUILD_FLAGS) -o ./build/ -mod=readonly ./cmd/$(APPNAME)d 
+
 install:
 	@echo "--> ensure dependencies have not been modified"
 	@go mod verify
 	@echo "--> installing $(APPNAME)d"
 	@go install $(BUILD_FLAGS) -mod=readonly ./cmd/$(APPNAME)d
 
-.PHONY: all install
+.PHONY: all build install
 
 ##################
 ###  Protobuf  ###
@@ -98,3 +103,32 @@ govet:
 	@go vet ./...
 
 .PHONY: govet
+
+################
+### Localnet ###
+################
+
+localnet_home=~/.gnovm-localnet
+localnetd=./build/gnovmd --home $(localnet_home)
+
+localnet-start: build
+	rm -rf ~/.gnovm-localnet
+	$(localnetd) init localnet --default-denom $(DENOM) --chain-id localnet
+	$(localnetd) config set client chain-id localnet
+	$(localnetd) config set client keyring-backend test
+	$(localnetd) keys add val
+	$(localnetd) genesis add-genesis-account val 1000000$(DENOM)
+	$(localnetd) keys add user
+	$(localnetd) genesis add-genesis-account user 1000000$(DENOM)
+	$(localnetd) genesis gentx val 1000000$(DENOM)
+	$(localnetd) genesis collect-gentxs
+	# Set gas prices
+	$(localnetd) config set app minimum-gas-prices 0.001$(DENOM)
+	# Enable REST API
+	$(localnetd) config set app api.enable true
+	# Decrease voting period to 5min
+	jq '.app_state.gov.params.voting_period = "300s"' $(localnet_home)/config/genesis.json > /tmp/gen
+	mv /tmp/gen $(localnet_home)/config/genesis.json
+	$(localnetd) start
+
+.PHONY: localnet-start
