@@ -32,7 +32,7 @@ The following command runs a single node locally, with the home located in
 make localnet-start
 ```
 
-To target the node, use `gnovmd --home ~/.gnovm-localnet ...`.
+To target the node, use `./build/gnovmd --home ~/.gnovm-localnet ...`.
 
 ### Add Realm / Package
 
