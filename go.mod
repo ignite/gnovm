@@ -6,7 +6,7 @@ replace (
 	// fix upstream GHSA-h395-qcrw-5vmq vulnerability.
 	github.com/gin-gonic/gin => github.com/gin-gonic/gin v1.9.1
 	// https://github.com/gnolang/gno/pull/4852
-	github.com/gnolang/gno => github.com/julienrbrt/gno v0.0.0-20251016194523-cc39946f0d00
+	github.com/gnolang/gno => github.com/allinbits/gno v0.0.0-20251027152958-cf2243d301a3
 	// replace broken goleveldb
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	// replace broken vanity url

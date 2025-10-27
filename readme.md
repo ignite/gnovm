@@ -6,7 +6,7 @@ Cosmos SDK module scaffolded with [Ignite](https://ignite.com), a developer-frie
 > [!WARNING]  
 > This module is still in its alpha phase. Expect bugs and breaking changes.
 > Please report any issues you encounter.
-> Additionally, we currently rely on a fork of the GnoVM containing only this PR: https://github.com/gnolang/gno/pull/4852.
+> Additionally, we currently rely on a small fork of the GnoVM containing only this PR: https://github.com/gnolang/gno/pull/4852: https://github.com/allinbits/gno/tree/denom-fix.
 
 ## Installation
 
@@ -32,7 +32,7 @@ gnovmd tx gnovm add-package ./tests/contracts/counter 5000stake --from alice
 ### Call Realm / Package
 
 ```bash
-gnovmd tx gnovm call 1stake gno.land/r/demo/counter Increment --from alice
+gnovmd tx gnovm call 5stake gno.land/r/demo/counter Increment --from alice
 ```
 
 ### Run Realm / Package
@@ -46,7 +46,7 @@ gnovmd tx gnovm run ./tests/contracts/counter 5000stake --from alice
 You can either query the `Render` function on the realm via cli:
 
 ```bash
-gnovmd eval gno.land/r/demo/counter 'Render("")'
+gnovmd q gnovm eval gno.land/r/demo/counter 'Render("")'
 ```
 
 Or directly access its RPC endpoint on your node: <http://localhost:1317/ignite/gnovm/gnovm/v1/render/gno.land/r/demo/counter>
