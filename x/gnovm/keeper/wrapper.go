@@ -49,7 +49,21 @@ func (v vmBankKeeper) RestrictedDenoms(ctx gnosdk.Context) []string {
 
 // AddCoins implements vm.BankKeeperI.
 func (v vmBankKeeper) AddCoins(ctx gnosdk.Context, addr crypto.Address, amt std.Coins) (std.Coins, error) {
-	panic("unimplemented")
+	addedCoins := types.SDKCoinsFromStdCoins(amt)
+
+	// mint coins to the module
+	if err := v.bankKeeper.MintCoins(v.vmParams.sdkCtx, types.ModuleName, addedCoins); err != nil {
+		return nil, err
+	}
+
+	// send minted coins from module to account
+	if err := v.bankKeeper.SendCoinsFromModuleToAccount(v.vmParams.sdkCtx, types.ModuleName, addr.Bytes(), addedCoins); err != nil {
+		return nil, err
+	}
+
+	// get and return new balance
+	newBalances := v.bankKeeper.GetAllBalances(v.vmParams.sdkCtx, addr.Bytes())
+	return types.StdCoinsFromSDKCoins(newBalances), nil
 }
 
 // GetCoins implements vm.BankKeeperI.

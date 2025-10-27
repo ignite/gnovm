@@ -95,7 +95,34 @@ func (m *mockBankKeeper) SendCoins(_ context.Context, from, to sdk.AccAddress, a
 }
 
 func (m *mockBankKeeper) SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
-	panic("not implemented")
+	// treat module as a regular account for testing purposes
+	moduleAddr := sdk.AccAddress(recipientModule)
+	return m.SendCoins(ctx, senderAddr, moduleAddr, amt)
+}
+
+func (m *mockBankKeeper) SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error {
+	// treat module as a regular account for testing purposes
+	moduleAddr := sdk.AccAddress(senderModule)
+	return m.SendCoins(ctx, moduleAddr, recipientAddr, amt)
+}
+
+func (m *mockBankKeeper) MintCoins(_ context.Context, moduleName string, amt sdk.Coins) error {
+	if amt.IsAnyNegative() {
+		return fmt.Errorf("negative amount")
+	}
+	if amt.IsZero() {
+		return nil
+	}
+
+	// mint coins to the module account
+	moduleKey := sdk.AccAddress(moduleName).String()
+	moduleBal := m.balances[moduleKey]
+	if moduleBal == nil {
+		moduleBal = sdk.NewCoins()
+	}
+	moduleBal = moduleBal.Add(amt...)
+	m.balances[moduleKey] = moduleBal
+	return nil
 }
 
 func initFixture(t *testing.T) *fixture {
