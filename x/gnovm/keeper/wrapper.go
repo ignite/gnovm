@@ -29,7 +29,7 @@ type vmAuthKeeper struct {
 // GetAccount implements vm.AccountKeeperI.
 func (v vmAuthKeeper) GetAccount(ctx gnosdk.Context, addr crypto.Address) std.Account {
 	account := v.authKeeper.GetAccount(v.vmParams.sdkCtx, addr.Bytes())
-	return types.StdAccountFromSDKAccount(account, v.bankKeeper)
+	return types.StdAccountFromSDKAccount(v.vmParams.sdkCtx, account, v.bankKeeper)
 }
 
 var _ vm.BankKeeperI = (*vmBankKeeper)(nil)

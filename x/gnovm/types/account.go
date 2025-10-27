@@ -11,8 +11,9 @@ import (
 
 // StfAccountFromSDKAccount convers an sdk.AccountI as an std.Account
 // As std.Account have as well balances, it takes a bank keeper as well.
-func StdAccountFromSDKAccount(acc sdk.AccountI, bankKeeper BankKeeper) std.Account {
+func StdAccountFromSDKAccount(ctx context.Context, acc sdk.AccountI, bankKeeper BankKeeper) std.Account {
 	return &accountWrapper{
+		ctx:        ctx,
 		acc:        acc,
 		bankKeeper: bankKeeper,
 	}
@@ -21,6 +22,7 @@ func StdAccountFromSDKAccount(acc sdk.AccountI, bankKeeper BankKeeper) std.Accou
 var _ std.Account = (*accountWrapper)(nil)
 
 type accountWrapper struct {
+	ctx        context.Context
 	acc        sdk.AccountI
 	bankKeeper BankKeeper
 }
@@ -37,7 +39,7 @@ func (a *accountWrapper) GetAddress() crypto.Address {
 
 // GetCoins implements std.Account.
 func (a *accountWrapper) GetCoins() std.Coins {
-	coins := a.bankKeeper.GetAllBalances(context.TODO(), a.acc.GetAddress())
+	coins := a.bankKeeper.GetAllBalances(a.ctx, a.acc.GetAddress())
 	return StdCoinsFromSDKCoins(coins)
 }
 
@@ -61,19 +63,21 @@ func (a *accountWrapper) SetAddress(addr crypto.Address) error {
 	return a.acc.SetAddress(addr.Bytes())
 }
 
-// SetCoins implements std.Account.
-func (a *accountWrapper) SetCoins(coins std.Coins) error {
-	panic("unimplemented")
-}
-
-// SetPubKey implements std.Account.
-func (a *accountWrapper) SetPubKey(pub crypto.PubKey) error {
-	panic("unimplemented")
-}
-
 // SetSequence implements std.Account.
 func (a *accountWrapper) SetSequence(seq uint64) error {
 	return a.acc.SetSequence(seq)
+}
+
+// SetCoins implements std.Account.
+// It is a no-op as the account handling is done by the x/bank module.
+func (a *accountWrapper) SetCoins(coins std.Coins) error {
+	return nil
+}
+
+// SetPubKey implements std.Account.
+// It is a no-op as the account handling is done by the x/auth module.
+func (a *accountWrapper) SetPubKey(pub crypto.PubKey) error {
+	return nil
 }
 
 // String implements std.Account.

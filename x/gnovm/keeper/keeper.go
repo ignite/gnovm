@@ -97,6 +97,8 @@ func (k Keeper) GetAuthority() []byte {
 	return k.authority
 }
 
+var defaultChainID = "default_chain_id"
+
 // initializeVMKeeper creates and initializes the VMKeeper with a proper MultiStore.
 // This should be called when we have access to a proper SDK context.
 func (k *Keeper) initializeVMKeeper(sdkCtx sdk.Context) error {
@@ -116,9 +118,10 @@ func (k *Keeper) initializeVMKeeper(sdkCtx sdk.Context) error {
 		gnostore.NewStoreKey(k.memStoreKey.Name()),
 	)
 
-	chainID := sdkCtx.ChainID()
+	chainID := sdkCtx.HeaderInfo().ChainID
 	if chainID == "" {
-		chainID = "default_chain_id" // TODO: investigate why chainID is emtpy here
+		k.logger.Warn("chainID is empty when building gno context, using default", "fallback", defaultChainID)
+		chainID = defaultChainID
 	}
 
 	// Create a clean gno context for initialization
@@ -179,9 +182,10 @@ func (k *Keeper) BuildGnoContext(sdkCtx sdk.Context) (gnosdk.Context, error) {
 		gnostore.NewStoreKey(k.memStoreKey.Name()),
 	)
 
-	chainID := sdkCtx.ChainID()
+	chainID := sdkCtx.HeaderInfo().ChainID
 	if chainID == "" {
-		chainID = "default_chain_id" // TODO: investigate why chainID is emtpy here
+		k.logger.Warn("chainID is empty when building gno context, using default", "fallback", defaultChainID)
+		chainID = defaultChainID
 	}
 
 	gnoCtx := gnosdk.NewContext(
