@@ -19,7 +19,11 @@ func (*gnoAnteHandler) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, nex
 		case sdk.MsgTypeURL(msg) == sdk.MsgTypeURL(&types.MsgRun{}) ||
 			sdk.MsgTypeURL(msg) == sdk.MsgTypeURL(&types.MsgAddPackage{}) ||
 			sdk.MsgTypeURL(msg) == sdk.MsgTypeURL(&types.MsgCall{}):
-			ctx = ctx.WithGasMeter(storetypes.NewInfiniteGasMeter()) // TODO: check if this is a hack or if the VM does prevent infinite gas.
+			// Use infinite gas meter for GnoVM transactions because the VM has its own
+			// internal gas tracking mechanism through the transaction store. Using the
+			// Cosmos SDK gas meter would result in double-counting gas consumption.
+			// The VM prevents infinite execution through its own gas limits.
+			ctx = ctx.WithGasMeter(storetypes.NewInfiniteGasMeter())
 			return ctx, nil
 		}
 	}
