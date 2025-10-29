@@ -2,8 +2,9 @@ package keeper_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
+
+	"github.com/golang/mock/gomock"
 
 	"cosmossdk.io/core/address"
 	"cosmossdk.io/log"
@@ -23,106 +24,8 @@ type fixture struct {
 	ctx          context.Context
 	keeper       keeper.Keeper
 	addressCodec address.Codec
-}
-
-// mockAuthKeeper implements types.AuthKeeper for tests.
-type mockAuthKeeper struct {
-	accounts map[string]sdk.AccountI
-}
-
-func newMockAuthKeeper() *mockAuthKeeper {
-	return &mockAuthKeeper{accounts: make(map[string]sdk.AccountI)}
-}
-
-func (m *mockAuthKeeper) GetAccount(_ context.Context, addr sdk.AccAddress) sdk.AccountI {
-	key := addr.String()
-	if acc, ok := m.accounts[key]; ok {
-		return acc
-	}
-	acc := authtypes.NewBaseAccountWithAddress(addr)
-	m.accounts[key] = acc
-	return acc
-}
-
-// mockBankKeeper implements types.BankKeeper for tests.
-type mockBankKeeper struct {
-	balances map[string]sdk.Coins
-}
-
-func newMockBankKeeper() *mockBankKeeper {
-	return &mockBankKeeper{balances: make(map[string]sdk.Coins)}
-}
-
-func (m *mockBankKeeper) GetAllBalances(_ context.Context, addr sdk.AccAddress) sdk.Coins {
-	if c, ok := m.balances[addr.String()]; ok {
-		return c
-	}
-	return sdk.NewCoins()
-}
-
-func (m *mockBankKeeper) SpendableCoins(ctx context.Context, addr sdk.AccAddress) sdk.Coins {
-	return m.GetAllBalances(ctx, addr)
-}
-
-func (m *mockBankKeeper) SendCoins(_ context.Context, from, to sdk.AccAddress, amt sdk.Coins) error {
-	if amt.IsAnyNegative() {
-		return fmt.Errorf("negative amount")
-	}
-	if amt.IsZero() {
-		return nil
-	}
-	fromKey := from.String()
-	toKey := to.String()
-
-	fromBal := m.balances[fromKey]
-	if fromBal == nil {
-		fromBal = sdk.NewCoins()
-	}
-	toBal := m.balances[toKey]
-	if toBal == nil {
-		toBal = sdk.NewCoins()
-	}
-
-	if !fromBal.IsAllGTE(amt) {
-		return fmt.Errorf("insufficient funds")
-	}
-	fromBal = fromBal.Sub(amt...)
-	toBal = toBal.Add(amt...)
-
-	m.balances[fromKey] = fromBal
-	m.balances[toKey] = toBal
-	return nil
-}
-
-func (m *mockBankKeeper) SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
-	// treat module as a regular account for testing purposes
-	moduleAddr := sdk.AccAddress(recipientModule)
-	return m.SendCoins(ctx, senderAddr, moduleAddr, amt)
-}
-
-func (m *mockBankKeeper) SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error {
-	// treat module as a regular account for testing purposes
-	moduleAddr := sdk.AccAddress(senderModule)
-	return m.SendCoins(ctx, moduleAddr, recipientAddr, amt)
-}
-
-func (m *mockBankKeeper) MintCoins(_ context.Context, moduleName string, amt sdk.Coins) error {
-	if amt.IsAnyNegative() {
-		return fmt.Errorf("negative amount")
-	}
-	if amt.IsZero() {
-		return nil
-	}
-
-	// mint coins to the module account
-	moduleKey := sdk.AccAddress(moduleName).String()
-	moduleBal := m.balances[moduleKey]
-	if moduleBal == nil {
-		moduleBal = sdk.NewCoins()
-	}
-	moduleBal = moduleBal.Add(amt...)
-	m.balances[moduleKey] = moduleBal
-	return nil
+	authKeeper   *MockAuthKeeper
+	bankKeeper   *MockBankKeeper
 }
 
 func initFixture(t *testing.T) *fixture {
@@ -139,6 +42,10 @@ func initFixture(t *testing.T) *fixture {
 
 	authority := authtypes.NewModuleAddress(types.GovModuleName)
 
+	ctrl := gomock.NewController(t)
+	authKeeper := NewMockAuthKeeper(ctrl)
+	bankKeeper := NewMockBankKeeper(ctrl)
+
 	k := keeper.NewKeeper(
 		log.NewTestLogger(t),
 		storeKey,
@@ -146,8 +53,8 @@ func initFixture(t *testing.T) *fixture {
 		encCfg.Codec,
 		addressCodec,
 		authority,
-		newMockAuthKeeper(),
-		newMockBankKeeper(),
+		authKeeper,
+		bankKeeper,
 	)
 
 	// Initialize params
@@ -159,5 +66,7 @@ func initFixture(t *testing.T) *fixture {
 		ctx:          sdkCtx,
 		keeper:       k,
 		addressCodec: addressCodec,
+		authKeeper:   authKeeper,
+		bankKeeper:   bankKeeper,
 	}
 }

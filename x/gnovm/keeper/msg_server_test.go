@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto"
 	"github.com/gnolang/gno/tm2/pkg/std"
 
@@ -43,6 +44,12 @@ func TestMsgRun_Basic(t *testing.T) {
 	}
 	pkgBz, err := json.Marshal(&mpkg)
 	require.NoError(t, err)
+	// setup mock expectations
+	f.authKeeper.EXPECT().GetAccount(f.ctx, callerBytes).
+		Return(authtypes.NewBaseAccountWithAddress(callerBytes))
+	// MsgRun transfers send from caller to caller (no-op)
+	f.bankKeeper.EXPECT().SendCoins(f.ctx, callerBytes, callerBytes,
+		sdk.NewCoins())
 
 	msg := &types.MsgRun{
 		Caller:     callerStr,
@@ -64,7 +71,8 @@ func TestMsgAddPackage_Basic(t *testing.T) {
 	// Initialize VM genesis params before executing messages
 	require.NoError(t, f.keeper.InitGenesis(f.ctx, types.GenesisState{Params: types.DefaultParams()}))
 
-	creatorStr, err := f.addressCodec.BytesToString(f.keeper.GetAuthority())
+	creatorBytes := f.keeper.GetAuthority()
+	creatorStr, err := f.addressCodec.BytesToString(creatorBytes)
 	require.NoError(t, err)
 
 	// Minimal valid package for add-package
@@ -77,6 +85,9 @@ func TestMsgAddPackage_Basic(t *testing.T) {
 	}
 	pkgBz, err := json.Marshal(&mpkg)
 	require.NoError(t, err)
+	// setup mock expectations
+	f.authKeeper.EXPECT().GetAccount(f.ctx, creatorBytes).
+		Return(authtypes.NewBaseAccountWithAddress(creatorBytes))
 
 	msg := &types.MsgAddPackage{
 		Creator:    creatorStr,

@@ -33,6 +33,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.53.3
 	github.com/cosmos/gogoproto v1.7.0
 	github.com/gnolang/gno v0.0.0-20250930114629-66df56529bed
+	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.4
 	github.com/gorilla/mux v1.8.1
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
@@ -414,6 +415,7 @@ tool (
 	github.com/cosmos/cosmos-proto/cmd/protoc-gen-go-pulsar
 	github.com/cosmos/gogoproto/protoc-gen-gocosmos
 	github.com/cosmos/gogoproto/protoc-gen-gogo
+	github.com/golang/mock/mockgen
 	github.com/golangci/golangci-lint/cmd/golangci-lint
 	github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
 	github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
