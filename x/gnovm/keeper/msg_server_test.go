@@ -15,8 +15,8 @@ import (
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
 
-// TestMsgRun_Basic ensures MsgRun succeeds with a minimal valid in-memory package.
-func TestMsgRun_Basic(t *testing.T) {
+// TestMsgRun_Failed ensures MsgRun fails with a minimal valid in-memory package.
+func TestMsgRun_Failed(t *testing.T) {
 	f := initFixture(t)
 	ms := keeper.NewMsgServerImpl(&f.keeper)
 
@@ -63,8 +63,8 @@ func TestMsgRun_Basic(t *testing.T) {
 	require.Contains(t, err.Error(), "failed to run VM")
 }
 
-// TestMsgAddPackage_Basic ensures MsgAddPackage succeeds with a minimal valid package.
-func TestMsgAddPackage_Basic(t *testing.T) {
+// TestMsgAddPackage_Failed ensures MsgAddPackage fails with a minimal valid package.
+func TestMsgAddPackage_Failed(t *testing.T) {
 	f := initFixture(t)
 	ms := keeper.NewMsgServerImpl(&f.keeper)
 
@@ -101,8 +101,8 @@ func TestMsgAddPackage_Basic(t *testing.T) {
 	require.Contains(t, err.Error(), "failed to add package")
 }
 
-// TestMsgCall_Basic validates forwarding to VMKeeper and error wrapping on missing realm/function.
-func TestMsgCall_Basic(t *testing.T) {
+// TestMsgCall_Failed validates forwarding to VMKeeper and error wrapping on missing realm/function.
+func TestMsgCall_Failed(t *testing.T) {
 	f := initFixture(t)
 	ms := keeper.NewMsgServerImpl(&f.keeper)
 
@@ -124,5 +124,5 @@ func TestMsgCall_Basic(t *testing.T) {
 
 	_, err = ms.Call(f.ctx, msg)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "failed to call VM")
+	require.Contains(t, err.Error(), "panic while calling VM")
 }
