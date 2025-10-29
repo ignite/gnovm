@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -22,6 +23,17 @@ func (k *Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) e
 	}
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// Import all key-value pairs into the store
+	if len(genState.State) > 0 {
+		store := k.storeService.OpenKVStore(sdkCtx)
+		for _, kv := range genState.State {
+			if err := store.Set(kv.Key, kv.Value); err != nil {
+				return fmt.Errorf("failed to set key-value pair during genesis import: %w", err)
+			}
+		}
+	}
+
 	gnoCtx, err := k.BuildGnoContext(sdkCtx)
 	if err != nil {
 		return err
@@ -77,6 +89,28 @@ func (k *Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error)
 	genesis := types.DefaultGenesis()
 	genesis.Params = types.VmParamsToParams(vmGenState.Params)
 	genesis.RealmParams = realmParams
+
+	// Export all key-value pairs from the store
+	store := k.storeService.OpenKVStore(sdkCtx)
+	iterator, err := store.Iterator(nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create store iterator: %w", err)
+	}
+	defer iterator.Close()
+
+	var state []types.KVPair
+	for ; iterator.Valid(); iterator.Next() {
+		key := iterator.Key()
+		value := iterator.Value()
+
+		// Store the key-value pair (make copies to avoid aliasing)
+		state = append(state, types.KVPair{
+			Key:   bytes.Clone(key),
+			Value: bytes.Clone(value),
+		})
+	}
+
+	genesis.State = state
 
 	return genesis, nil
 }

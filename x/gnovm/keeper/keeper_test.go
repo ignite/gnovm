@@ -7,9 +7,11 @@ import (
 	"github.com/golang/mock/gomock"
 
 	"cosmossdk.io/core/address"
+	"cosmossdk.io/core/store"
 	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
 	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	"github.com/cosmos/cosmos-sdk/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
@@ -24,6 +26,7 @@ type fixture struct {
 	ctx          context.Context
 	keeper       keeper.Keeper
 	addressCodec address.Codec
+	storeService store.KVStoreService
 	authKeeper   *MockAuthKeeper
 	bankKeeper   *MockBankKeeper
 }
@@ -68,5 +71,6 @@ func initFixture(t *testing.T) *fixture {
 		addressCodec: addressCodec,
 		authKeeper:   authKeeper,
 		bankKeeper:   bankKeeper,
+		storeService: runtime.NewKVStoreService(storeKey),
 	}
 }

@@ -16,4 +16,13 @@ message GenesisState {
   ];
   // realm_params defines the realm parameters of the module.
   bytes realm_params = 2;
+  // state contains all key-value pairs from the gnovm store.
+  // currently that part of the state should NOT be modified manually.
+  repeated KVPair state = 3 [(gogoproto.nullable) = false];
+}
+
+// KVPair represents a key-value pair from the store.
+message KVPair {
+  bytes key = 1;
+  bytes value = 2;
 }
