@@ -64,9 +64,9 @@ install:
 
 .PHONY: all build install
 
-##################
-###  Protobuf  ###
-##################
+#################
+###  Codegen  ###
+#################
 
 # Use this target if you do not want to use Ignite for generating proto files
 
@@ -78,7 +78,10 @@ proto-gen:
 	@echo "Generating protobuf files..."
 	@ignite generate proto-go --yes
 
-.PHONY: proto-gen
+mocks-gen:
+	@go tool mockgen -source=x/gnovm/types/expected_keepers.go -package keeper_test -destination x/gnovm/keeper/expected_keepers_test.go
+
+.PHONY: proto-gen proto-deps mocks-gen
 
 #################
 ###  Linting  ###
