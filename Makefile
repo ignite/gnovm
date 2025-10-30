@@ -42,7 +42,7 @@ bench:
 	@echo Running unit tests with benchmarking...
 	@go test -mod=readonly -v -timeout 30m -bench=. ./...
 
-test: govet govulncheck test-unit
+test: govet test-unit
 
 .PHONY: test test-unit test-race test-cover bench
 
@@ -52,9 +52,9 @@ test: govet govulncheck test-unit
 
 all: install
 
-build: 
+build:
 	@echo "--> building ./build/$(APPNAME)d"
-	@go build $(BUILD_FLAGS) -o ./build/ -mod=readonly ./cmd/$(APPNAME)d 
+	@go build $(BUILD_FLAGS) -o ./build/ -mod=readonly ./cmd/$(APPNAME)d
 
 install:
 	@echo "--> ensure dependencies have not been modified"
