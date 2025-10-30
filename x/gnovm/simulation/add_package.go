@@ -1,14 +1,12 @@
 package simulation
 
 import (
-	"encoding/json"
 	"math/rand"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	"github.com/gnolang/gno/tm2/pkg/std"
 
 	"github.com/ignite/gnovm/x/gnovm/keeper"
 	"github.com/ignite/gnovm/x/gnovm/types"
@@ -28,19 +26,16 @@ func SimulateMsgAddPackage(
 		}
 
 		// Build a minimal valid package and execute via MsgServer
-		files := []*std.MemFile{
-			{
-				Name: "p.gno",
-				Body: "package p\n",
+		msg.Package = &types.Package{
+			Name: "p",
+			Path: "gno.land/r/demo/p",
+			Files: []*types.File{
+				{
+					Name: "p.gno",
+					Body: "package p\n",
+				},
 			},
 		}
-		mpkg := std.MemPackage{
-			Name:  "p",
-			Path:  "gno.land/r/demo/p",
-			Files: files,
-		}
-		bz, _ := json.Marshal(&mpkg)
-		msg.Package = bz
 		msg.Deposit = sdk.NewCoins()
 		msg.MaxDeposit = sdk.NewInt64Coin("ugnot", 0)
 

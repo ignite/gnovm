@@ -10,15 +10,27 @@ option go_package = "github.com/ignite/gnovm/x/gnovm/types";
 // GenesisState defines the gnovm module's genesis state.
 message GenesisState {
   // params defines all the parameters of the module.
-  Params params = 1 [
-    (gogoproto.nullable) = false,
-    (amino.dont_omitempty) = true
-  ];
+  Params params = 1
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
   // realm_params defines the realm parameters of the module.
   bytes realm_params = 2;
+  // packages contains the genesis smart contracts.
+  repeated Package packages = 3;
   // state contains all key-value pairs from the gnovm store.
   // currently that part of the state should NOT be modified manually.
-  repeated KVPair state = 3 [(gogoproto.nullable) = false];
+  repeated KVPair state = 4 [ (gogoproto.nullable) = false ];
+}
+
+// Packages maps gno std.MemPackage
+message Package {
+  string name = 1;
+  string path = 2;
+  repeated File files = 3;
+}
+
+message File {
+  string name = 1;
+  string body = 2;
 }
 
 // KVPair represents a key-value pair from the store.

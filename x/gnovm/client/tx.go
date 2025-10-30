@@ -1,9 +1,10 @@
 package client
 
 import (
-	"encoding/json"
 	"fmt"
 	"path/filepath"
+
+	"github.com/spf13/cobra"
 
 	"cosmossdk.io/core/address"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -11,7 +12,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gnolang/gno/gnovm/pkg/gnolang"
-	"github.com/spf13/cobra"
+	"github.com/gnolang/gno/tm2/pkg/std"
 
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
@@ -68,17 +69,12 @@ func NewAddPackageCmd(addressCodec address.Codec) *cobra.Command {
 				return fmt.Errorf("failed to read package")
 			}
 
-			pkgJSON, err := json.Marshal(memPkg)
-			if err != nil {
-				return fmt.Errorf("failed to marshal package: %v", err)
-			}
-
 			deposit, err := sdk.ParseCoinNormalized(args[1])
 			if err != nil {
 				return err
 			}
 
-			msg := types.NewMsgAddPackage(creator, sdk.Coins{deposit}, deposit, pkgJSON)
+			msg := types.NewMsgAddPackage(creator, sdk.Coins{deposit}, deposit, toPkg(memPkg))
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -124,6 +120,20 @@ func NewCallCmd(addressCodec address.Codec) *cobra.Command {
 	return cmd
 }
 
+func toPkg(mp *std.MemPackage) *types.Package {
+	p := &types.Package{
+		Name: mp.Name,
+		Path: mp.Path,
+	}
+	for _, f := range mp.Files {
+		p.Files = append(p.Files, &types.File{
+			Name: f.Name,
+			Body: f.Body,
+		})
+	}
+	return p
+}
+
 // NewRunCmd returns a CLI command handler for creating a MsgRun transaction.
 func NewRunCmd(addressCodec address.Codec) *cobra.Command {
 	cmd := &cobra.Command{
@@ -156,17 +166,12 @@ func NewRunCmd(addressCodec address.Codec) *cobra.Command {
 				return fmt.Errorf("failed to read package")
 			}
 
-			pkgJSON, err := json.Marshal(memPkg)
-			if err != nil {
-				return fmt.Errorf("failed to marshal package: %v", err)
-			}
-
 			deposit, err := sdk.ParseCoinNormalized(args[1])
 			if err != nil {
 				return err
 			}
 
-			msg := types.NewMsgRun(caller, sdk.Coins{deposit}, deposit, pkgJSON)
+			msg := types.NewMsgRun(caller, sdk.Coins{deposit}, deposit, toPkg(memPkg))
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

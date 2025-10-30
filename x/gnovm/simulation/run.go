@@ -2,14 +2,12 @@ package simulation
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"math/rand"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	"github.com/gnolang/gno/tm2/pkg/std"
 
 	"github.com/ignite/gnovm/x/gnovm/keeper"
 	"github.com/ignite/gnovm/x/gnovm/types"
@@ -28,26 +26,22 @@ func SimulateMsgRun(
 			Caller: simAccount.Address.String(),
 		}
 
-		// Build a minimal valid in-memory package for MsgRun
-		files := []*std.MemFile{
-			{
-				Name: "main.gno",
-				Body: "package main\n",
-			},
-		}
-
 		// Expected run path is gno.land/e/<caller_hex>/run where caller is the crypto.Address string form.
 		// We approximate it using the hex form of the account bytes to satisfy MemPackage path validation.
 		addrHex := hex.EncodeToString(simAccount.Address.Bytes())
 
-		mpkg := std.MemPackage{
-			Name:  "main",
-			Path:  "gno.land/e/" + addrHex + "/run",
-			Files: files,
-		}
+		// Build a minimal valid in-memory package for MsgRun
 
-		bz, _ := json.Marshal(&mpkg)
-		msg.Pkg = bz
+		msg.Pkg = &types.Package{
+			Name: "main",
+			Path: "gno.land/e/" + addrHex + "/run",
+			Files: []*types.File{
+				{
+					Name: "main.gno",
+					Body: "package main\n",
+				},
+			},
+		}
 
 		// Execute through the message server
 		ms := keeper.NewMsgServerImpl(&k)

@@ -1,7 +1,6 @@
 package keeper_test
 
 import (
-	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -9,7 +8,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto"
-	"github.com/gnolang/gno/tm2/pkg/std"
 
 	"github.com/ignite/gnovm/x/gnovm/keeper"
 	"github.com/ignite/gnovm/x/gnovm/types"
@@ -35,15 +33,13 @@ func TestMsgRun_Failed(t *testing.T) {
 	runPath := "gno.land/e/" + caddr.String() + "/run"
 
 	// Minimal valid MemPackage
-	mpkg := std.MemPackage{
+	pkg := &types.Package{
 		Name: "main",
 		Path: runPath,
-		Files: []*std.MemFile{
+		Files: []*types.File{
 			{Name: "main.gno", Body: "package main\n"},
 		},
 	}
-	pkgBz, err := json.Marshal(&mpkg)
-	require.NoError(t, err)
 	// setup mock expectations
 	f.authKeeper.EXPECT().GetAccount(f.ctx, callerBytes).
 		Return(authtypes.NewBaseAccountWithAddress(callerBytes))
@@ -55,11 +51,12 @@ func TestMsgRun_Failed(t *testing.T) {
 		Caller:     callerStr,
 		Send:       sdk.NewCoins(),
 		MaxDeposit: sdk.NewInt64Coin("ugnot", 0),
-		Pkg:        pkgBz,
+		Pkg:        pkg,
 	}
 
 	_, err = ms.Run(f.ctx, msg)
 	require.Error(t, err)
+	println(err.Error())
 	require.Contains(t, err.Error(), "failed to run VM")
 }
 
@@ -76,15 +73,13 @@ func TestMsgAddPackage_Failed(t *testing.T) {
 	require.NoError(t, err)
 
 	// Minimal valid package for add-package
-	mpkg := std.MemPackage{
+	pkg := &types.Package{
 		Name: "p",
 		Path: "gno.land/r/demo/p",
-		Files: []*std.MemFile{
+		Files: []*types.File{
 			{Name: "p.gno", Body: "package p\n"},
 		},
 	}
-	pkgBz, err := json.Marshal(&mpkg)
-	require.NoError(t, err)
 	// setup mock expectations
 	f.authKeeper.EXPECT().GetAccount(f.ctx, creatorBytes).
 		Return(authtypes.NewBaseAccountWithAddress(creatorBytes))
@@ -93,7 +88,7 @@ func TestMsgAddPackage_Failed(t *testing.T) {
 		Creator:    creatorStr,
 		Deposit:    sdk.NewCoins(),
 		MaxDeposit: sdk.NewInt64Coin("ugnot", 0),
-		Package:    pkgBz,
+		Package:    pkg,
 	}
 
 	_, err = ms.AddPackage(f.ctx, msg)

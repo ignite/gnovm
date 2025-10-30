@@ -2,13 +2,10 @@ package keeper
 
 import (
 	"context"
-	"encoding/json"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
-
-	"github.com/gnolang/gno/tm2/pkg/std"
 
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
@@ -28,17 +25,9 @@ func (k msgServer) AddPackage(ctx context.Context, msg *types.MsgAddPackage) (*t
 	send := types.StdCoinsFromSDKCoins(msg.Deposit)
 	maxDep := types.StdCoinsFromSDKCoins(sdk.NewCoins(msg.MaxDeposit))
 
-	var mpkg std.MemPackage
-	if err := json.Unmarshal(msg.Package, &mpkg); err != nil {
-		return nil, errorsmod.Wrap(err, "invalid package")
-	}
-	if err := mpkg.ValidateBasic(); err != nil {
-		return nil, errorsmod.Wrap(err, "invalid package")
-	}
-
 	vmMsg := vm.MsgAddPackage{
 		Creator:    types.ToCryptoAddress(creatorBytes),
-		Package:    &mpkg,
+		Package:    msg.Package.ToMemPackage(),
 		Send:       send,
 		MaxDeposit: maxDep,
 	}
