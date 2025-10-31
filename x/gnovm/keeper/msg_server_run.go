@@ -35,7 +35,7 @@ func (k msgServer) Run(ctx context.Context, msg *types.MsgRun) (*types.MsgRunRes
 		return nil, errorsmod.Wrap(err, "invalid package")
 	}
 
-	if _, err := k.VMKeeper.Run(
+	resp, err := k.VMKeeper.Run(
 		gnoCtx,
 		vm.MsgRun{
 			Caller:     types.ToCryptoAddress(callerBytes),
@@ -43,12 +43,16 @@ func (k msgServer) Run(ctx context.Context, msg *types.MsgRun) (*types.MsgRunRes
 			MaxDeposit: maxDep,
 			Package:    &mpkg,
 		},
-	); err != nil {
+	)
+
+	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to run VM")
 	}
 
 	// this commits the changes to the module store (that is only committed later)
 	k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
 
-	return &types.MsgRunResponse{}, nil
+	return &types.MsgRunResponse{
+		Result: string(resp),
+	}, nil
 }

@@ -86,4 +86,6 @@ message MsgRun {
 }
 
 // MsgRunResponse defines the MsgRunResponse message.
-message MsgRunResponse {}
+message MsgRunResponse {
+  string result = 1;
+}

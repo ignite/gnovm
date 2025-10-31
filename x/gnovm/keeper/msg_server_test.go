@@ -1,40 +1,223 @@
 package keeper_test
 
 import (
+	_ "embed"
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/BurntSushi/toml"
+	"github.com/gnolang/gno/gnovm/pkg/gnolang"
+	"github.com/gnolang/gno/tm2/pkg/crypto"
+	"github.com/gnolang/gno/tm2/pkg/std"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/gnolang/gno/tm2/pkg/crypto"
-	"github.com/gnolang/gno/tm2/pkg/std"
 
 	"github.com/ignite/gnovm/x/gnovm/keeper"
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
 
-// TestMsgRun_Failed ensures MsgRun fails with a minimal valid in-memory package.
-func TestMsgRun_Failed(t *testing.T) {
+//go:embed testdata/counter/counter.gno
+var counterGno string
+
+//go:embed testdata/counter/gnomod.toml
+var counterGnoMod string
+
+// GnoMod represents the gnomod.toml configuration for a Gno package.
+type GnoMod struct {
+	Module string `toml:"module"`
+	Gno    string `toml:"gno"`
+}
+
+// ParseGnoMod parses gnomod.toml content and returns the configuration.
+func ParseGnoMod(data []byte) (*GnoMod, error) {
+	var config GnoMod
+	if err := toml.Unmarshal(data, &config); err != nil {
+		return nil, err
+	}
+	return &config, nil
+}
+
+// CreateMemPackageFromFiles creates a MemPackage from file contents.
+func CreateMemPackageFromFiles(name, path string, files map[string]string) (*std.MemPackage, error) {
+	memFiles := make([]*std.MemFile, 0, len(files))
+	for filename, content := range files {
+		memFiles = append(memFiles, &std.MemFile{
+			Name: filename,
+			Body: content,
+		})
+	}
+
+	return &std.MemPackage{
+		Name:  name,
+		Path:  path,
+		Files: memFiles,
+	}, nil
+}
+
+// ReadMemPackageFromDir reads a MemPackage from a directory on disk.
+func ReadMemPackageFromDir(dirPath string) (*std.MemPackage, error) {
+	gnoModPath := filepath.Join(dirPath, "gnomod.toml")
+	data, err := os.ReadFile(gnoModPath)
+	if err != nil {
+		return nil, err
+	}
+
+	gnoMod, err := ParseGnoMod(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return gnolang.ReadMemPackage(dirPath, gnoMod.Module, gnolang.MPAnyAll)
+}
+
+// TestMsgAddPackage_Success validates adding the counter package successfully.
+func TestMsgAddPackage_Success(t *testing.T) {
 	f := initFixture(t)
 	ms := keeper.NewMsgServerImpl(&f.keeper)
 
-	// Initialize VM genesis params (chain domain, etc.) before executing messages
 	require.NoError(t, f.keeper.InitGenesis(f.ctx, types.GenesisState{Params: types.DefaultParams()}))
 
-	// Use module authority as a valid caller address.
+	creatorBytes := f.keeper.GetAuthority()
+	creatorStr, err := f.addressCodec.BytesToString(creatorBytes)
+	require.NoError(t, err)
+
+	// Read the counter package from testdata directory
+	testdataPath := filepath.Join("testdata", "counter")
+	mpkg, err := ReadMemPackageFromDir(testdataPath)
+	require.NoError(t, err)
+
+	pkgBz, err := json.Marshal(mpkg)
+	require.NoError(t, err)
+
+	// Use sufficient deposit to cover storage costs (2949 bytes * 1 stake/byte = 2949 stake)
+	deposit := sdk.NewInt64Coin("stake", 5000)
+
+	f.authKeeper.EXPECT().GetAccount(f.ctx, creatorBytes).
+		Return(authtypes.NewBaseAccountWithAddress(creatorBytes)).AnyTimes()
+	// The VM sends coins during package initialization to various addresses
+	f.bankKeeper.EXPECT().SendCoins(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	f.bankKeeper.EXPECT().GetAllBalances(gomock.Any(), gomock.Any()).Return(sdk.NewCoins()).AnyTimes()
+
+	msg := types.NewMsgAddPackage(creatorStr, sdk.NewCoins(deposit), deposit, pkgBz)
+
+	resp, err := ms.AddPackage(f.ctx, msg)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+}
+
+// TestMsgCall_Success validates calling the counter Increment function.
+func TestMsgCall_Success(t *testing.T) {
+	f := initFixture(t)
+	ms := keeper.NewMsgServerImpl(&f.keeper)
+
+	require.NoError(t, f.keeper.InitGenesis(f.ctx, types.GenesisState{Params: types.DefaultParams()}))
+
+	creatorBytes := f.keeper.GetAuthority()
+	creatorStr, err := f.addressCodec.BytesToString(creatorBytes)
+	require.NoError(t, err)
+
+	// Read the counter package from testdata directory
+	testdataPath := filepath.Join("testdata", "counter")
+	mpkg, err := ReadMemPackageFromDir(testdataPath)
+	require.NoError(t, err)
+
+	pkgBz, err := json.Marshal(mpkg)
+	require.NoError(t, err)
+
+	deposit := sdk.NewInt64Coin("stake", 5000)
+
+	f.authKeeper.EXPECT().GetAccount(f.ctx, creatorBytes).
+		Return(authtypes.NewBaseAccountWithAddress(creatorBytes)).AnyTimes()
+	// The VM sends coins during package initialization and calls
+	f.bankKeeper.EXPECT().SendCoins(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	f.bankKeeper.EXPECT().GetAllBalances(gomock.Any(), gomock.Any()).Return(sdk.NewCoins()).AnyTimes()
+
+	addPkgMsg := types.NewMsgAddPackage(creatorStr, sdk.NewCoins(deposit), deposit, pkgBz)
+	_, err = ms.AddPackage(f.ctx, addPkgMsg)
+	require.NoError(t, err)
+
+	amount := sdk.NewInt64Coin("ugnot", 0)
+
+	callMsg := types.NewMsgCall(creatorStr, sdk.NewCoins(), amount, mpkg.Path, "Increment", []string{})
+	resp, err := ms.Call(f.ctx, callMsg)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	require.Contains(t, resp.Result, "1")
+}
+
+// TestMsgRun_Success validates running a simple script.
+func TestMsgRun_Success(t *testing.T) {
+	f := initFixture(t)
+	ms := keeper.NewMsgServerImpl(&f.keeper)
+
+	require.NoError(t, f.keeper.InitGenesis(f.ctx, types.GenesisState{Params: types.DefaultParams()}))
+
 	callerStr, err := f.addressCodec.BytesToString(f.keeper.GetAuthority())
 	require.NoError(t, err)
 
-	// Build the expected run path: gno.land/e/<caller-crypto-addr>/run
 	callerBytes, err := f.addressCodec.StringToBytes(callerStr)
 	require.NoError(t, err)
+
 	var caddr crypto.Address
 	copy(caddr[:], callerBytes)
 	runPath := "gno.land/e/" + caddr.String() + "/run"
 
-	// Minimal valid MemPackage
+	mpkg := &std.MemPackage{
+		Name: "main",
+		Path: runPath,
+		Files: []*std.MemFile{
+			{
+				Name: "main.gno",
+				Body: `package main
+
+func main() {
+	println("Hello, GnoVM!")
+}
+`,
+			},
+		},
+	}
+
+	pkgBz, err := json.Marshal(mpkg)
+	require.NoError(t, err)
+
+	amount := sdk.NewInt64Coin("ugnot", 0)
+
+	f.authKeeper.EXPECT().GetAccount(f.ctx, callerBytes).
+		Return(authtypes.NewBaseAccountWithAddress(callerBytes))
+	f.bankKeeper.EXPECT().SendCoins(f.ctx, callerBytes, callerBytes, sdk.NewCoins())
+
+	msg := types.NewMsgRun(callerStr, sdk.NewCoins(), amount, pkgBz)
+
+	resp, err := ms.Run(f.ctx, msg)
+	require.NoError(t, err)
+	require.Equal(t, resp, &types.MsgRunResponse{
+		Result: "Hello, GnoVM!\n",
+	})
+}
+
+// TestMsgRun_Failed ensures MsgRun fails with a minimal invalid package.
+func TestMsgRun_Failed(t *testing.T) {
+	f := initFixture(t)
+	ms := keeper.NewMsgServerImpl(&f.keeper)
+
+	require.NoError(t, f.keeper.InitGenesis(f.ctx, types.GenesisState{Params: types.DefaultParams()}))
+
+	callerStr, err := f.addressCodec.BytesToString(f.keeper.GetAuthority())
+	require.NoError(t, err)
+
+	callerBytes, err := f.addressCodec.StringToBytes(callerStr)
+	require.NoError(t, err)
+
+	var caddr crypto.Address
+	copy(caddr[:], callerBytes)
+	runPath := "gno.land/e/" + caddr.String() + "/run"
+
 	mpkg := std.MemPackage{
 		Name: "main",
 		Path: runPath,
@@ -44,12 +227,10 @@ func TestMsgRun_Failed(t *testing.T) {
 	}
 	pkgBz, err := json.Marshal(&mpkg)
 	require.NoError(t, err)
-	// setup mock expectations
+
 	f.authKeeper.EXPECT().GetAccount(f.ctx, callerBytes).
 		Return(authtypes.NewBaseAccountWithAddress(callerBytes))
-	// MsgRun transfers send from caller to caller (no-op)
-	f.bankKeeper.EXPECT().SendCoins(f.ctx, callerBytes, callerBytes,
-		sdk.NewCoins())
+	f.bankKeeper.EXPECT().SendCoins(f.ctx, callerBytes, callerBytes, sdk.NewCoins())
 
 	msg := &types.MsgRun{
 		Caller:     callerStr,
@@ -63,19 +244,17 @@ func TestMsgRun_Failed(t *testing.T) {
 	require.Contains(t, err.Error(), "failed to run VM")
 }
 
-// TestMsgAddPackage_Failed ensures MsgAddPackage fails with a minimal valid package.
+// TestMsgAddPackage_Failed ensures MsgAddPackage fails with a minimal invalid package.
 func TestMsgAddPackage_Failed(t *testing.T) {
 	f := initFixture(t)
 	ms := keeper.NewMsgServerImpl(&f.keeper)
 
-	// Initialize VM genesis params before executing messages
 	require.NoError(t, f.keeper.InitGenesis(f.ctx, types.GenesisState{Params: types.DefaultParams()}))
 
 	creatorBytes := f.keeper.GetAuthority()
 	creatorStr, err := f.addressCodec.BytesToString(creatorBytes)
 	require.NoError(t, err)
 
-	// Minimal valid package for add-package
 	mpkg := std.MemPackage{
 		Name: "p",
 		Path: "gno.land/r/demo/p",
@@ -85,7 +264,7 @@ func TestMsgAddPackage_Failed(t *testing.T) {
 	}
 	pkgBz, err := json.Marshal(&mpkg)
 	require.NoError(t, err)
-	// setup mock expectations
+
 	f.authKeeper.EXPECT().GetAccount(f.ctx, creatorBytes).
 		Return(authtypes.NewBaseAccountWithAddress(creatorBytes))
 
@@ -101,23 +280,21 @@ func TestMsgAddPackage_Failed(t *testing.T) {
 	require.Contains(t, err.Error(), "failed to add package")
 }
 
-// TestMsgCall_Failed validates forwarding to VMKeeper and error wrapping on missing realm/function.
+// TestMsgCall_Failed validates error handling when calling missing realm function.
 func TestMsgCall_Failed(t *testing.T) {
 	f := initFixture(t)
 	ms := keeper.NewMsgServerImpl(&f.keeper)
 
-	// Initialize VM genesis params before executing messages
 	require.NoError(t, f.keeper.InitGenesis(f.ctx, types.GenesisState{Params: types.DefaultParams()}))
 
 	callerStr, err := f.addressCodec.BytesToString(f.keeper.GetAuthority())
 	require.NoError(t, err)
 
-	// Provide valid fields; underlying VM likely errors due to missing realm/function.
 	msg := &types.MsgCall{
 		Caller:     callerStr,
 		Send:       sdk.NewCoins(),
 		MaxDeposit: sdk.NewInt64Coin("ugnot", 0),
-		PkgPath:    "gno.land/r/demo/p",
+		PkgPath:    "gno.land/r/demo/nonexistent",
 		Function:   "main",
 		Args:       nil,
 	}
