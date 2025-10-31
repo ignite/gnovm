@@ -1,7 +1,6 @@
 package keeper_test
 
 import (
-	_ "embed"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -20,12 +19,6 @@ import (
 	"github.com/ignite/gnovm/x/gnovm/keeper"
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
-
-//go:embed testdata/counter/counter.gno
-var counterGno string
-
-//go:embed testdata/counter/gnomod.toml
-var counterGnoMod string
 
 // GnoMod represents the gnomod.toml configuration for a Gno package.
 type GnoMod struct {
