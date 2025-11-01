@@ -11,6 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gnolang/gno/gnovm/pkg/gnolang"
+	"github.com/gnolang/gno/gnovm/pkg/gnomod"
 	"github.com/spf13/cobra"
 
 	"github.com/ignite/gnovm/x/gnovm/types"
@@ -58,7 +59,7 @@ func NewAddPackageCmd(addressCodec address.Codec) *cobra.Command {
 				return err
 			}
 
-			gnoMod, err := parseGnoMod(filepath.Join(folderPath, gnoModName))
+			gnoMod, err := gnomod.ParseDir(folderPath)
 			if err != nil {
 				return err
 			}
@@ -146,7 +147,7 @@ func NewRunCmd(addressCodec address.Codec) *cobra.Command {
 				return err
 			}
 
-			gnoMod, err := parseGnoMod(filepath.Join(folderPath, gnoModName))
+			gnoMod, err := gnomod.ParseDir(folderPath)
 			if err != nil {
 				return err
 			}
