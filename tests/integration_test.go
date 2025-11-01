@@ -158,6 +158,13 @@ func initFixture(t testing.TB) *fixture {
 	}
 }
 
+func getGnoAddress(t *testing.T, addr []byte) string {
+	addressCodec := addresscodec.NewBech32Codec("g")
+	n, err := addressCodec.BytesToString(addr)
+	require.NoError(t, err)
+	return n
+}
+
 // TestBankerContract_DeployAndDeposit tests deploying the banker contract and depositing coins
 func TestBankerContract_DeployAndDeposit(t *testing.T) {
 	t.Parallel()
@@ -182,11 +189,11 @@ func TestBankerContract_DeployAndDeposit(t *testing.T) {
 
 	// Query initial deployer balance
 	initialBalance := f.bankKeeper.GetBalance(f.ctx, deployer, testDenom)
-	assert.Equal(t, "100000000", initialBalance.Amount.String())
+	require.Equal(t, "100000000", initialBalance.Amount.String())
 
 	// Query initial recipient balance (should be 100000000)
 	recipientBalance := f.bankKeeper.GetBalance(f.ctx, recipient, testDenom)
-	assert.Equal(t, "100000000", recipientBalance.Amount.String())
+	require.Equal(t, "100000000", recipientBalance.Amount.String())
 
 	// Deploy the banker package with sufficient storage deposit
 	deposit := sdk.NewInt64Coin(testDenom, 10000)
@@ -209,14 +216,14 @@ func TestBankerContract_DeployAndDeposit(t *testing.T) {
 
 	// Verify deployer balance decreased by deposit
 	newBalance := f.bankKeeper.GetBalance(f.ctx, deployer, testDenom)
-	assert.Assert(t, newBalance.Amount.LT(initialBalance.Amount))
+	require.True(t, newBalance.Amount.LT(initialBalance.Amount))
 
 	// Call Deposit function, sending 50000 stake with the transaction
 	depositAmount := sdk.NewInt64Coin(testDenom, 50000)
 	msgCall := gnovmtypes.NewMsgCall(
 		deployerStr,
 		sdk.NewCoins(depositAmount),
-		sdk.NewInt64Coin(testDenom, 1000),
+		sdk.NewInt64Coin(testDenom, 2000),
 		mpkg.Path,
 		"Deposit",
 		[]string{},
@@ -233,7 +240,7 @@ func TestBankerContract_DeployAndDeposit(t *testing.T) {
 	var callResp gnovmtypes.MsgCallResponse
 	err = f.cdc.Unmarshal(res.Value, &callResp)
 	require.NoError(t, err)
-	assert.Assert(t, len(callResp.Result) > 0)
+	require.Greater(t, len(callResp.Result), 0)
 }
 
 // TestBankerContract_SendCoins tests sending coins from the realm to a user
@@ -255,7 +262,6 @@ func TestBankerContract_SendCoins(t *testing.T) {
 	deployer := f.addrDels[0]
 	recipient := f.addrDels[1]
 	deployerStr, _ := f.accountKeeper.AddressCodec().BytesToString(deployer)
-	recipientStr, _ := f.accountKeeper.AddressCodec().BytesToString(recipient)
 
 	// Deploy package
 	deposit := sdk.NewInt64Coin(testDenom, 10000)
@@ -278,7 +284,7 @@ func TestBankerContract_SendCoins(t *testing.T) {
 	msgDeposit := gnovmtypes.NewMsgCall(
 		deployerStr,
 		sdk.NewCoins(depositAmount),
-		sdk.NewInt64Coin(testDenom, 1000),
+		sdk.NewInt64Coin(testDenom, 2000),
 		mpkg.Path,
 		"Deposit",
 		[]string{},
@@ -298,11 +304,11 @@ func TestBankerContract_SendCoins(t *testing.T) {
 	transferAmount := int64(30000)
 	msgSendCoins := gnovmtypes.NewMsgCall(
 		deployerStr,
-		sdk.NewCoins(),
-		sdk.NewInt64Coin(testDenom, 1000),
+		sdk.NewCoins(depositAmount),
+		sdk.NewInt64Coin(testDenom, 2000),
 		mpkg.Path,
 		"SendCoins",
-		[]string{recipientStr, fmt.Sprintf("%d", transferAmount), testDenom},
+		[]string{getGnoAddress(t, recipient), fmt.Sprintf("%d", transferAmount), testDenom},
 	)
 
 	res, err := f.app.RunMsg(
@@ -363,7 +369,7 @@ func TestBankerContract_QueryBalance(t *testing.T) {
 	msgDeposit := gnovmtypes.NewMsgCall(
 		deployerStr,
 		sdk.NewCoins(depositAmount),
-		sdk.NewInt64Coin(testDenom, 1000),
+		sdk.NewInt64Coin(testDenom, 2000),
 		mpkg.Path,
 		"Deposit",
 		[]string{},
@@ -380,7 +386,7 @@ func TestBankerContract_QueryBalance(t *testing.T) {
 	msgGetBalance := gnovmtypes.NewMsgCall(
 		deployerStr,
 		sdk.NewCoins(),
-		sdk.NewInt64Coin(testDenom, 1000),
+		sdk.NewInt64Coin(testDenom, 2000),
 		mpkg.Path,
 		"GetBalance",
 		[]string{},
@@ -420,8 +426,6 @@ func TestBankerContract_MultipleTransfers(t *testing.T) {
 	recipient1 := f.addrDels[1]
 	recipient2 := f.addrDels[2]
 	deployerStr, _ := f.accountKeeper.AddressCodec().BytesToString(deployer)
-	recipient1Str, _ := f.accountKeeper.AddressCodec().BytesToString(recipient1)
-	recipient2Str, _ := f.accountKeeper.AddressCodec().BytesToString(recipient2)
 
 	// Deploy package
 	deposit := sdk.NewInt64Coin(testDenom, 10000)
@@ -444,7 +448,7 @@ func TestBankerContract_MultipleTransfers(t *testing.T) {
 	msgDeposit := gnovmtypes.NewMsgCall(
 		deployerStr,
 		sdk.NewCoins(depositAmount),
-		sdk.NewInt64Coin(testDenom, 1000),
+		sdk.NewInt64Coin(testDenom, 2000),
 		mpkg.Path,
 		"Deposit",
 		[]string{},
@@ -463,22 +467,22 @@ func TestBankerContract_MultipleTransfers(t *testing.T) {
 
 	// Perform multiple transfers
 	transfers := []struct {
-		to     string
+		to     []byte
 		amount int64
 	}{
-		{recipient1Str, 10000},
-		{recipient2Str, 20000},
-		{recipient1Str, 15000},
+		{recipient1, 10000},
+		{recipient2, 20000},
+		{recipient1, 15000},
 	}
 
 	for _, transfer := range transfers {
 		msgSend := gnovmtypes.NewMsgCall(
 			deployerStr,
-			sdk.NewCoins(),
-			sdk.NewInt64Coin(testDenom, 1000),
+			sdk.NewCoins(depositAmount),
+			sdk.NewInt64Coin(testDenom, 2000),
 			mpkg.Path,
 			"SendCoins",
-			[]string{transfer.to, fmt.Sprintf("%d", transfer.amount), testDenom},
+			[]string{getGnoAddress(t, transfer.to), fmt.Sprintf("%d", transfer.amount), testDenom},
 		)
 
 		_, err = f.app.RunMsg(
