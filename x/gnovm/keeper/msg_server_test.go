@@ -2,16 +2,16 @@ package keeper_test
 
 import (
 	"encoding/json"
-	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/BurntSushi/toml"
-	"github.com/gnolang/gno/gnovm/pkg/gnolang"
-	"github.com/gnolang/gno/tm2/pkg/crypto"
-	"github.com/gnolang/gno/tm2/pkg/std"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/gnolang/gno/gnovm/pkg/gnolang"
+	"github.com/gnolang/gno/gnovm/pkg/gnomod"
+	"github.com/gnolang/gno/tm2/pkg/crypto"
+	"github.com/gnolang/gno/tm2/pkg/std"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -19,21 +19,6 @@ import (
 	"github.com/ignite/gnovm/x/gnovm/keeper"
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
-
-// GnoMod represents the gnomod.toml configuration for a Gno package.
-type GnoMod struct {
-	Module string `toml:"module"`
-	Gno    string `toml:"gno"`
-}
-
-// ParseGnoMod parses gnomod.toml content and returns the configuration.
-func ParseGnoMod(data []byte) (*GnoMod, error) {
-	var config GnoMod
-	if err := toml.Unmarshal(data, &config); err != nil {
-		return nil, err
-	}
-	return &config, nil
-}
 
 // CreateMemPackageFromFiles creates a MemPackage from file contents.
 func CreateMemPackageFromFiles(name, path string, files map[string]string) (*std.MemPackage, error) {
@@ -54,13 +39,7 @@ func CreateMemPackageFromFiles(name, path string, files map[string]string) (*std
 
 // ReadMemPackageFromDir reads a MemPackage from a directory on disk.
 func ReadMemPackageFromDir(dirPath string) (*std.MemPackage, error) {
-	gnoModPath := filepath.Join(dirPath, "gnomod.toml")
-	data, err := os.ReadFile(gnoModPath)
-	if err != nil {
-		return nil, err
-	}
-
-	gnoMod, err := ParseGnoMod(data)
+	gnoMod, err := gnomod.ParseDir(dirPath)
 	if err != nil {
 		return nil, err
 	}
