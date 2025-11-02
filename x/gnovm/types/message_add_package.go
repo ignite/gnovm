@@ -2,10 +2,10 @@ package types
 
 import sdk "github.com/cosmos/cosmos-sdk/types"
 
-func NewMsgAddPackage(creator string, deposit sdk.Coins, maxDeposit sdk.Coin, pkg []byte) *MsgAddPackage {
+func NewMsgAddPackage(creator string, send, maxDeposit sdk.Coins, pkg []byte) *MsgAddPackage {
 	return &MsgAddPackage{
 		Creator:    creator,
-		Deposit:    deposit,
+		Send:       send,
 		MaxDeposit: maxDeposit,
 		Package:    pkg,
 	}

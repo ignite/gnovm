@@ -41,8 +41,8 @@ func SimulateMsgAddPackage(
 		}
 		bz, _ := json.Marshal(&mpkg)
 		msg.Package = bz
-		msg.Deposit = sdk.NewCoins()
-		msg.MaxDeposit = sdk.NewInt64Coin("ugnot", 0)
+		msg.Send = sdk.NewCoins()
+		msg.MaxDeposit = sdk.NewCoins(sdk.NewInt64Coin("ugnot", 0))
 
 		ms := keeper.NewMsgServerImpl(&k)
 		if _, err := ms.AddPackage(ctx, msg); err != nil {

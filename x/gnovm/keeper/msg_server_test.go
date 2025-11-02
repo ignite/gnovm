@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
 	"github.com/gnolang/gno/gnovm/pkg/gnolang"
@@ -67,15 +66,20 @@ func TestMsgAddPackage_Success(t *testing.T) {
 	require.NoError(t, err)
 
 	// Use sufficient deposit to cover storage costs (2949 bytes * 1 stake/byte = 2949 stake)
-	deposit := sdk.NewInt64Coin("stake", 5000)
+	deposit, _ := sdk.ParseCoinsNormalized("2949stake")
+	send, _ := sdk.ParseCoinsNormalized("1000stake")
+	maxDeposit, _ := sdk.ParseCoinsNormalized("5000stake")
 
 	f.authKeeper.EXPECT().GetAccount(f.ctx, creatorBytes).
-		Return(authtypes.NewBaseAccountWithAddress(creatorBytes)).AnyTimes()
-	// The VM sends coins during package initialization to various addresses
-	f.bankKeeper.EXPECT().SendCoins(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
-	f.bankKeeper.EXPECT().GetAllBalances(gomock.Any(), gomock.Any()).Return(sdk.NewCoins()).AnyTimes()
+		Return(authtypes.NewBaseAccountWithAddress(creatorBytes))
+	// Expected SendCoins for the send parameter
+	pkgAddr := gnolang.DerivePkgCryptoAddr("gno.land/r/demo/counter").Bytes()
+	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, pkgAddr, send)
+	// Expected SendCoins for the storage deposit
+	storageDepositAddr := gnolang.DeriveStorageDepositCryptoAddr("gno.land/r/demo/counter").Bytes()
+	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, storageDepositAddr, deposit)
 
-	msg := types.NewMsgAddPackage(creatorStr, sdk.NewCoins(deposit), deposit, pkgBz)
+	msg := types.NewMsgAddPackage(creatorStr, send, maxDeposit, pkgBz)
 
 	resp, err := ms.AddPackage(f.ctx, msg)
 	require.NoError(t, err)
@@ -101,21 +105,33 @@ func TestMsgCall_Success(t *testing.T) {
 	pkgBz, err := json.Marshal(mpkg)
 	require.NoError(t, err)
 
-	deposit := sdk.NewInt64Coin("stake", 5000)
+	send, _ := sdk.ParseCoinsNormalized("1000stake")
+	deposit, _ := sdk.ParseCoinsNormalized("2949stake")
+	maxDeposit, _ := sdk.ParseCoinsNormalized("5000stake")
 
 	f.authKeeper.EXPECT().GetAccount(f.ctx, creatorBytes).
 		Return(authtypes.NewBaseAccountWithAddress(creatorBytes)).AnyTimes()
-	// The VM sends coins during package initialization and calls
-	f.bankKeeper.EXPECT().SendCoins(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
-	f.bankKeeper.EXPECT().GetAllBalances(gomock.Any(), gomock.Any()).Return(sdk.NewCoins()).AnyTimes()
+	// Expected SendCoins for the send parameter
+	pkgAddr := gnolang.DerivePkgCryptoAddr("gno.land/r/demo/counter").Bytes()
+	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, pkgAddr, send)
+	// Expected SendCoins for the storage deposit
+	storageDepositAddr := gnolang.DeriveStorageDepositCryptoAddr("gno.land/r/demo/counter").Bytes()
+	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, storageDepositAddr, deposit)
 
-	addPkgMsg := types.NewMsgAddPackage(creatorStr, sdk.NewCoins(deposit), deposit, pkgBz)
+	addPkgMsg := types.NewMsgAddPackage(creatorStr, send, maxDeposit, pkgBz)
 	_, err = ms.AddPackage(f.ctx, addPkgMsg)
 	require.NoError(t, err)
 
+	send, _ = sdk.ParseCoinsNormalized("2000stake")
+	deposit, _ = sdk.ParseCoinsNormalized("5stake")
 	amount := sdk.NewInt64Coin("ugnot", 0)
 
-	callMsg := types.NewMsgCall(creatorStr, sdk.NewCoins(), amount, mpkg.Path, "Increment", []string{})
+	// Expected SendCoins for the send parameter
+	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, pkgAddr, send)
+	// Expected SendCoins for the storage deposit
+	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, storageDepositAddr, deposit)
+
+	callMsg := types.NewMsgCall(creatorStr, send, amount, mpkg.Path, "Increment", []string{})
 	resp, err := ms.Call(f.ctx, callMsg)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
@@ -242,8 +258,8 @@ func TestMsgAddPackage_Failed(t *testing.T) {
 
 	msg := &types.MsgAddPackage{
 		Creator:    creatorStr,
-		Deposit:    sdk.NewCoins(),
-		MaxDeposit: sdk.NewInt64Coin("ugnot", 0),
+		Send:       sdk.NewCoins(),
+		MaxDeposit: sdk.NewCoins(sdk.NewInt64Coin("ugnot", 0)),
 		Package:    pkgBz,
 	}
 

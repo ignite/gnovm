@@ -25,8 +25,8 @@ func (k msgServer) AddPackage(ctx context.Context, msg *types.MsgAddPackage) (*t
 		return nil, errorsmod.Wrap(err, "failed to initialize VM")
 	}
 
-	send := types.StdCoinsFromSDKCoins(msg.Deposit)
-	maxDep := types.StdCoinsFromSDKCoins(sdk.NewCoins(msg.MaxDeposit))
+	send := types.StdCoinsFromSDKCoins(msg.Send)
+	maxDep := types.StdCoinsFromSDKCoins(msg.MaxDeposit)
 
 	var mpkg std.MemPackage
 	if err := json.Unmarshal(msg.Package, &mpkg); err != nil {

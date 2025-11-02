@@ -74,12 +74,13 @@ func NewAddPackageCmd(addressCodec address.Codec) *cobra.Command {
 				return fmt.Errorf("failed to marshal package: %v", err)
 			}
 
-			deposit, err := sdk.ParseCoinNormalized(args[1])
+			deposit, err := sdk.ParseCoinsNormalized(args[1])
 			if err != nil {
 				return err
 			}
 
-			msg := types.NewMsgAddPackage(creator, sdk.Coins{deposit}, deposit, pkgJSON)
+			// TODO fix mix of send and deposit
+			msg := types.NewMsgAddPackage(creator, deposit, deposit, pkgJSON)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

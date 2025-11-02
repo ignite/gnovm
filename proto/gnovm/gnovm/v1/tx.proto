@@ -52,8 +52,8 @@ message MsgUpdateParamsResponse {}
 message MsgAddPackage {
   option (cosmos.msg.v1.signer) = "creator";
   string creator = 1;
-  repeated cosmos.base.v1beta1.Coin deposit = 2 [(gogoproto.nullable) = false];
-  cosmos.base.v1beta1.Coin max_deposit = 3 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin send = 2 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin max_deposit = 3 [(gogoproto.nullable) = false];
   bytes package = 4;
 }
 
