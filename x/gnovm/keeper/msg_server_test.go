@@ -290,3 +290,56 @@ func TestMsgCall_Failed(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "panic while calling VM")
 }
+
+// TestMsgCall_Transfer validates calling the faucet.Transfer function which
+// transfers 1ugnot from the realm addres to the caller address.
+func TestMsgCall_Transfer(t *testing.T) {
+	f := initFixture(t)
+	ms := keeper.NewMsgServerImpl(&f.keeper)
+
+	require.NoError(t, f.keeper.InitGenesis(f.ctx, types.GenesisState{Params: types.DefaultParams()}))
+
+	creatorBytes := f.keeper.GetAuthority()
+	creatorStr, err := f.addressCodec.BytesToString(creatorBytes)
+	require.NoError(t, err)
+
+	// Read the faucet package from testdata directory
+	testdataPath := filepath.Join("testdata", "faucet")
+	mpkg, err := ReadMemPackageFromDir(testdataPath)
+	require.NoError(t, err)
+
+	pkgBz, err := json.Marshal(mpkg)
+	require.NoError(t, err)
+
+	maxDeposit, _ := sdk.ParseCoinsNormalized("5000stake")
+	deposit, _ := sdk.ParseCoinsNormalized("2115stake")
+	send, _ := sdk.ParseCoinsNormalized("1000stake")
+
+	f.authKeeper.EXPECT().GetAccount(f.ctx, creatorBytes).
+		Return(authtypes.NewBaseAccountWithAddress(creatorBytes)).AnyTimes()
+	// Expected SendCoins for the send parameter
+	pkgAddr := gnolang.DerivePkgCryptoAddr(mpkg.Path).Bytes()
+	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, pkgAddr, send)
+	// Expected SendCoins for the storage deposit
+	storageDepositAddr := gnolang.DeriveStorageDepositCryptoAddr(mpkg.Path).Bytes()
+	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, storageDepositAddr, deposit)
+
+	addPkgMsg := types.NewMsgAddPackage(creatorStr, send, maxDeposit, pkgBz)
+
+	_, err = ms.AddPackage(f.ctx, addPkgMsg)
+	require.NoError(t, err)
+
+	send, _ = sdk.ParseCoinsNormalized("2000stake")
+
+	maxDeposit, _ = sdk.ParseCoinsNormalized("0stake") // no storage deposit
+	deposit, _ = sdk.ParseCoinsNormalized("0stake")    // no storage deposit
+	// Expected SendCoins for the send parameter
+	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, pkgAddr, send)
+	// Expected SendCoins for the transfer realm
+	f.bankKeeper.EXPECT().SendCoins(f.ctx, pkgAddr, creatorBytes, sdk.NewCoins(sdk.NewInt64Coin("ugnot", 1)))
+
+	callMsg := types.NewMsgCall(creatorStr, send, maxDeposit, mpkg.Path, "Transfer", nil)
+	resp, err := ms.Call(f.ctx, callMsg)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+}
