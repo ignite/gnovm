@@ -29,7 +29,7 @@ func SimulateMsgCall(
 		msg.PkgPath = "gno.land/r/demo/p"
 		msg.Function = "main"
 		msg.Args = nil
-		msg.MaxDeposit = sdk.NewInt64Coin("test", 0)
+		msg.MaxDeposit = sdk.NewCoins(sdk.NewInt64Coin("test", 0))
 
 		ms := keeper.NewMsgServerImpl(&k)
 		if _, err := ms.Call(ctx, msg); err != nil {

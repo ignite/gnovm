@@ -73,10 +73,10 @@ func TestMsgAddPackage_Success(t *testing.T) {
 	f.authKeeper.EXPECT().GetAccount(f.ctx, creatorBytes).
 		Return(authtypes.NewBaseAccountWithAddress(creatorBytes))
 	// Expected SendCoins for the send parameter
-	pkgAddr := gnolang.DerivePkgCryptoAddr("gno.land/r/demo/counter").Bytes()
+	pkgAddr := gnolang.DerivePkgCryptoAddr(mpkg.Path).Bytes()
 	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, pkgAddr, send)
 	// Expected SendCoins for the storage deposit
-	storageDepositAddr := gnolang.DeriveStorageDepositCryptoAddr("gno.land/r/demo/counter").Bytes()
+	storageDepositAddr := gnolang.DeriveStorageDepositCryptoAddr(mpkg.Path).Bytes()
 	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, storageDepositAddr, deposit)
 
 	msg := types.NewMsgAddPackage(creatorStr, send, maxDeposit, pkgBz)
@@ -112,10 +112,10 @@ func TestMsgCall_Success(t *testing.T) {
 	f.authKeeper.EXPECT().GetAccount(f.ctx, creatorBytes).
 		Return(authtypes.NewBaseAccountWithAddress(creatorBytes)).AnyTimes()
 	// Expected SendCoins for the send parameter
-	pkgAddr := gnolang.DerivePkgCryptoAddr("gno.land/r/demo/counter").Bytes()
+	pkgAddr := gnolang.DerivePkgCryptoAddr(mpkg.Path).Bytes()
 	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, pkgAddr, send)
 	// Expected SendCoins for the storage deposit
-	storageDepositAddr := gnolang.DeriveStorageDepositCryptoAddr("gno.land/r/demo/counter").Bytes()
+	storageDepositAddr := gnolang.DeriveStorageDepositCryptoAddr(mpkg.Path).Bytes()
 	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, storageDepositAddr, deposit)
 
 	addPkgMsg := types.NewMsgAddPackage(creatorStr, send, maxDeposit, pkgBz)
@@ -124,14 +124,13 @@ func TestMsgCall_Success(t *testing.T) {
 
 	send, _ = sdk.ParseCoinsNormalized("2000stake")
 	deposit, _ = sdk.ParseCoinsNormalized("5stake")
-	amount := sdk.NewInt64Coin("ugnot", 0)
 
 	// Expected SendCoins for the send parameter
 	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, pkgAddr, send)
 	// Expected SendCoins for the storage deposit
 	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, storageDepositAddr, deposit)
 
-	callMsg := types.NewMsgCall(creatorStr, send, amount, mpkg.Path, "Increment", []string{})
+	callMsg := types.NewMsgCall(creatorStr, send, maxDeposit, mpkg.Path, "Increment", []string{})
 	resp, err := ms.Call(f.ctx, callMsg)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
@@ -174,13 +173,13 @@ func main() {
 	pkgBz, err := json.Marshal(mpkg)
 	require.NoError(t, err)
 
-	amount := sdk.NewInt64Coin("ugnot", 0)
+	maxDeposit, _ := sdk.ParseCoinsNormalized("0ugnot")
 
 	f.authKeeper.EXPECT().GetAccount(f.ctx, callerBytes).
 		Return(authtypes.NewBaseAccountWithAddress(callerBytes))
 	f.bankKeeper.EXPECT().SendCoins(f.ctx, callerBytes, callerBytes, sdk.NewCoins())
 
-	msg := types.NewMsgRun(callerStr, sdk.NewCoins(), amount, pkgBz)
+	msg := types.NewMsgRun(callerStr, sdk.NewCoins(), maxDeposit, pkgBz)
 
 	resp, err := ms.Run(f.ctx, msg)
 	require.NoError(t, err)
@@ -223,7 +222,7 @@ func TestMsgRun_Failed(t *testing.T) {
 	msg := &types.MsgRun{
 		Caller:     callerStr,
 		Send:       sdk.NewCoins(),
-		MaxDeposit: sdk.NewInt64Coin("ugnot", 0),
+		MaxDeposit: sdk.NewCoins(sdk.NewInt64Coin("ugnot", 0)),
 		Pkg:        pkgBz,
 	}
 
@@ -281,7 +280,7 @@ func TestMsgCall_Failed(t *testing.T) {
 	msg := &types.MsgCall{
 		Caller:     callerStr,
 		Send:       sdk.NewCoins(),
-		MaxDeposit: sdk.NewInt64Coin("ugnot", 0),
+		MaxDeposit: sdk.NewCoins(sdk.NewInt64Coin("ugnot", 0)),
 		PkgPath:    "gno.land/r/demo/nonexistent",
 		Function:   "main",
 		Args:       nil,

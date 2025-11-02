@@ -65,7 +65,7 @@ message MsgCall {
   option (cosmos.msg.v1.signer) = "caller";
   string caller = 1;
   repeated cosmos.base.v1beta1.Coin send = 2 [(gogoproto.nullable) = false];
-  cosmos.base.v1beta1.Coin max_deposit = 3 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin max_deposit = 3 [(gogoproto.nullable) = false];
   string pkg_path = 4;
   string function = 5;
   repeated string args = 6;
@@ -81,7 +81,7 @@ message MsgRun {
   option (cosmos.msg.v1.signer) = "caller";
   string caller = 1;
   repeated cosmos.base.v1beta1.Coin send = 2 [(gogoproto.nullable) = false];
-  cosmos.base.v1beta1.Coin max_deposit = 3 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin max_deposit = 3 [(gogoproto.nullable) = false];
   bytes pkg = 4;
 }
 

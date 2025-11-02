@@ -2,8 +2,8 @@ package banker
 
 import (
 	"chain"
-	"chain/runtime"
 	"chain/banker"
+	"chain/runtime"
 )
 
 type activity struct {
@@ -44,7 +44,7 @@ func GetUserBalance(_ realm, addr address) chain.Coins {
 
 // SendCoins sends coins from the realm to a specified address.
 func SendCoins(_ realm, to address, amount int64, denom string) string {
-	b := banker.NewBanker(banker.BankerTypeOriginSend)
+	b := banker.NewBanker(banker.BankerTypeRealmSend)
 	realmAddr := runtime.CurrentRealm().Address()
 
 	// Create the coins to send

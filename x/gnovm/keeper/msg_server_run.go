@@ -25,7 +25,7 @@ func (k msgServer) Run(ctx context.Context, msg *types.MsgRun) (*types.MsgRunRes
 	}
 
 	send := types.StdCoinsFromSDKCoins(msg.Send)
-	maxDep := types.StdCoinsFromSDKCoins(sdk.NewCoins(msg.MaxDeposit))
+	maxDep := types.StdCoinsFromSDKCoins(msg.MaxDeposit)
 
 	var mpkg std.MemPackage
 	if err := json.Unmarshal(msg.Pkg, &mpkg); err != nil {
@@ -44,7 +44,6 @@ func (k msgServer) Run(ctx context.Context, msg *types.MsgRun) (*types.MsgRunRes
 			Package:    &mpkg,
 		},
 	)
-
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to run VM")
 	}

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/spf13/cobra"
+
 	"cosmossdk.io/core/address"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -12,7 +14,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gnolang/gno/gnovm/pkg/gnolang"
 	"github.com/gnolang/gno/gnovm/pkg/gnomod"
-	"github.com/spf13/cobra"
 
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
@@ -103,7 +104,7 @@ func NewCallCmd(addressCodec address.Codec) *cobra.Command {
 				return err
 			}
 
-			amount, err := sdk.ParseCoinNormalized(args[0])
+			amount, err := sdk.ParseCoinsNormalized(args[0])
 			if err != nil {
 				return err
 			}
@@ -116,7 +117,8 @@ func NewCallCmd(addressCodec address.Codec) *cobra.Command {
 			pkgPath := args[1]
 			function := args[2]
 
-			msg := types.NewMsgCall(caller, sdk.Coins{amount}, amount, pkgPath, function, args[3:])
+			// TODO fix mix of send and deposit
+			msg := types.NewMsgCall(caller, amount, amount, pkgPath, function, args[3:])
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
@@ -163,12 +165,13 @@ func NewRunCmd(addressCodec address.Codec) *cobra.Command {
 				return fmt.Errorf("failed to marshal package: %v", err)
 			}
 
-			deposit, err := sdk.ParseCoinNormalized(args[1])
+			deposit, err := sdk.ParseCoinsNormalized(args[1])
 			if err != nil {
 				return err
 			}
 
-			msg := types.NewMsgRun(caller, sdk.Coins{deposit}, deposit, pkgJSON)
+			// TODO fix mix of send and deposit
+			msg := types.NewMsgRun(caller, deposit, deposit, pkgJSON)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
