@@ -18,6 +18,10 @@ import (
 	"github.com/ignite/gnovm/x/gnovm/types"
 )
 
+const (
+	flagSend = "send"
+)
+
 // NewTxCmd returns a root CLI command handler for gnovm transaction commands with a better UX than with AutoCLI.
 func NewTxCmd(addressCodec address.Codec) *cobra.Command {
 	rootCmd := &cobra.Command{
@@ -40,7 +44,7 @@ func NewTxCmd(addressCodec address.Codec) *cobra.Command {
 // NewAddPackageCmd returns a CLI command handler for creating a MsgAddPackage transaction.
 func NewAddPackageCmd(addressCodec address.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add-package [pkgFolder] [deposit] --from creator",
+		Use:   "add-package [pkgFolder] [deposit] --send [coins] --from creator",
 		Args:  cobra.ExactArgs(2),
 		Short: "Add a new package to the GnoVM",
 		Long:  "Add a new package to the GnoVM. Currently only one package can be added at a time.",
@@ -80,14 +84,24 @@ func NewAddPackageCmd(addressCodec address.Codec) *cobra.Command {
 				return err
 			}
 
-			// TODO fix mix of send and deposit
-			msg := types.NewMsgAddPackage(creator, deposit, deposit, pkgJSON)
+			sendStr, err := cmd.Flags().GetString(flagSend)
+			if err != nil {
+				return err
+			}
+
+			send, err := sdk.ParseCoinsNormalized(sendStr)
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgAddPackage(creator, send, deposit, pkgJSON)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
 
 	flags.AddTxFlagsToCmd(cmd)
+	cmd.Flags().String(flagSend, "", "Coins to send along with the package")
 
 	return cmd
 }
@@ -95,7 +109,7 @@ func NewAddPackageCmd(addressCodec address.Codec) *cobra.Command {
 // NewCallCmd returns a CLI command handler for creating a MsgCall transaction.
 func NewCallCmd(addressCodec address.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "call [send] [pkgPath] [function] [args] --from caller",
+		Use:   "call [send] [pkgPath] [function] [args] --deposit [coins] --from caller",
 		Args:  cobra.MinimumNArgs(3),
 		Short: "Call a package on the GnoVM",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -104,7 +118,7 @@ func NewCallCmd(addressCodec address.Codec) *cobra.Command {
 				return err
 			}
 
-			amount, err := sdk.ParseCoinsNormalized(args[0])
+			send, err := sdk.ParseCoinsNormalized(args[0])
 			if err != nil {
 				return err
 			}
@@ -114,16 +128,26 @@ func NewCallCmd(addressCodec address.Codec) *cobra.Command {
 				return err
 			}
 
+			depositStr, err := cmd.Flags().GetString("deposit")
+			if err != nil {
+				return err
+			}
+
+			deposit, err := sdk.ParseCoinsNormalized(depositStr)
+			if err != nil {
+				return err
+			}
+
 			pkgPath := args[1]
 			function := args[2]
 
-			// TODO fix mix of send and deposit
-			msg := types.NewMsgCall(caller, amount, amount, pkgPath, function, args[3:])
+			msg := types.NewMsgCall(caller, send, deposit, pkgPath, function, args[3:])
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
 
 	flags.AddTxFlagsToCmd(cmd)
+	cmd.Flags().String("deposit", "", "Coins to deposit with the call")
 
 	return cmd
 }
@@ -131,7 +155,7 @@ func NewCallCmd(addressCodec address.Codec) *cobra.Command {
 // NewRunCmd returns a CLI command handler for creating a MsgRun transaction.
 func NewRunCmd(addressCodec address.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "run [pkgFolder] [deposit] --from caller",
+		Use:   "run [pkgFolder] [deposit] --send [coins] --from caller",
 		Args:  cobra.ExactArgs(2),
 		Short: "Run a tx on the GnoVM",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -170,14 +194,24 @@ func NewRunCmd(addressCodec address.Codec) *cobra.Command {
 				return err
 			}
 
-			// TODO fix mix of send and deposit
-			msg := types.NewMsgRun(caller, deposit, deposit, pkgJSON)
+			sendStr, err := cmd.Flags().GetString(flagSend)
+			if err != nil {
+				return err
+			}
+
+			send, err := sdk.ParseCoinsNormalized(sendStr)
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgRun(caller, send, deposit, pkgJSON)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
 
 	flags.AddTxFlagsToCmd(cmd)
+	cmd.Flags().String(flagSend, "", "Coins to send with the run")
 
 	return cmd
 }
