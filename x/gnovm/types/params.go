@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	defaultDepositCost int64 = 100
+	defaultDepositCost int64 = 100_000
 	defaultStorageCost int64 = 1
 	moduleAccountAddr        = authtypes.NewModuleAddress(ModuleName)
 )

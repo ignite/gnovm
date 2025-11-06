@@ -19,7 +19,8 @@ import (
 )
 
 const (
-	flagSend = "send"
+	flagSend       = "send"
+	flagMaxDeposit = "max-deposit"
 )
 
 // NewTxCmd returns a root CLI command handler for gnovm transaction commands with a better UX than with AutoCLI.
@@ -44,8 +45,8 @@ func NewTxCmd(addressCodec address.Codec) *cobra.Command {
 // NewAddPackageCmd returns a CLI command handler for creating a MsgAddPackage transaction.
 func NewAddPackageCmd(addressCodec address.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add-package [pkgFolder] [deposit] --send [coins] --from creator",
-		Args:  cobra.ExactArgs(2),
+		Use:   "add-package [pkgFolder] --from creator",
+		Args:  cobra.ExactArgs(1),
 		Short: "Add a new package to the GnoVM",
 		Long:  "Add a new package to the GnoVM. Currently only one package can be added at a time.",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -79,7 +80,11 @@ func NewAddPackageCmd(addressCodec address.Codec) *cobra.Command {
 				return fmt.Errorf("failed to marshal package: %v", err)
 			}
 
-			deposit, err := sdk.ParseCoinsNormalized(args[1])
+			maxDepositStr, err := cmd.Flags().GetString(flagMaxDeposit)
+			if err != nil {
+				return err
+			}
+			maxDeposit, err := sdk.ParseCoinsNormalized(maxDepositStr)
 			if err != nil {
 				return err
 			}
@@ -88,13 +93,12 @@ func NewAddPackageCmd(addressCodec address.Codec) *cobra.Command {
 			if err != nil {
 				return err
 			}
-
 			send, err := sdk.ParseCoinsNormalized(sendStr)
 			if err != nil {
 				return err
 			}
 
-			msg := types.NewMsgAddPackage(creator, send, deposit, pkgJSON)
+			msg := types.NewMsgAddPackage(creator, send, maxDeposit, pkgJSON)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -102,6 +106,7 @@ func NewAddPackageCmd(addressCodec address.Codec) *cobra.Command {
 
 	flags.AddTxFlagsToCmd(cmd)
 	cmd.Flags().String(flagSend, "", "Coins to send along with the package")
+	cmd.Flags().String(flagMaxDeposit, "", "Maximum amount of coins to be spent for the storage fee (if empty the VM will use a default value)")
 
 	return cmd
 }
@@ -109,16 +114,11 @@ func NewAddPackageCmd(addressCodec address.Codec) *cobra.Command {
 // NewCallCmd returns a CLI command handler for creating a MsgCall transaction.
 func NewCallCmd(addressCodec address.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "call [send] [pkgPath] [function] [args] --deposit [coins] --from caller",
-		Args:  cobra.MinimumNArgs(3),
+		Use:   "call [pkgPath] [function] [args] --from caller",
+		Args:  cobra.MinimumNArgs(2),
 		Short: "Call a package on the GnoVM",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			send, err := sdk.ParseCoinsNormalized(args[0])
 			if err != nil {
 				return err
 			}
@@ -128,26 +128,35 @@ func NewCallCmd(addressCodec address.Codec) *cobra.Command {
 				return err
 			}
 
-			depositStr, err := cmd.Flags().GetString("deposit")
+			sendStr, err := cmd.Flags().GetString(flagSend)
+			if err != nil {
+				return err
+			}
+			send, err := sdk.ParseCoinsNormalized(sendStr)
 			if err != nil {
 				return err
 			}
 
-			deposit, err := sdk.ParseCoinsNormalized(depositStr)
+			maxDepositStr, err := cmd.Flags().GetString(flagMaxDeposit)
+			if err != nil {
+				return err
+			}
+			maxDeposit, err := sdk.ParseCoinsNormalized(maxDepositStr)
 			if err != nil {
 				return err
 			}
 
-			pkgPath := args[1]
-			function := args[2]
+			pkgPath := args[0]
+			function := args[1]
 
-			msg := types.NewMsgCall(caller, send, deposit, pkgPath, function, args[3:])
+			msg := types.NewMsgCall(caller, send, maxDeposit, pkgPath, function, args[2:])
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
 
 	flags.AddTxFlagsToCmd(cmd)
-	cmd.Flags().String("deposit", "", "Coins to deposit with the call")
+	cmd.Flags().String(flagSend, "", "Coins to send along with the package")
+	cmd.Flags().String(flagMaxDeposit, "", "Maximum amount of coins to be spent for the storage fee (if empty the VM will use a default value)")
 
 	return cmd
 }
@@ -155,8 +164,8 @@ func NewCallCmd(addressCodec address.Codec) *cobra.Command {
 // NewRunCmd returns a CLI command handler for creating a MsgRun transaction.
 func NewRunCmd(addressCodec address.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "run [pkgFolder] [deposit] --send [coins] --from caller",
-		Args:  cobra.ExactArgs(2),
+		Use:   "run [pkgFolder] --from caller",
+		Args:  cobra.ExactArgs(1),
 		Short: "Run a tx on the GnoVM",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
@@ -189,29 +198,33 @@ func NewRunCmd(addressCodec address.Codec) *cobra.Command {
 				return fmt.Errorf("failed to marshal package: %v", err)
 			}
 
-			deposit, err := sdk.ParseCoinsNormalized(args[1])
-			if err != nil {
-				return err
-			}
-
 			sendStr, err := cmd.Flags().GetString(flagSend)
 			if err != nil {
 				return err
 			}
-
 			send, err := sdk.ParseCoinsNormalized(sendStr)
 			if err != nil {
 				return err
 			}
 
-			msg := types.NewMsgRun(caller, send, deposit, pkgJSON)
+			maxDepositStr, err := cmd.Flags().GetString(flagMaxDeposit)
+			if err != nil {
+				return err
+			}
+			maxDeposit, err := sdk.ParseCoinsNormalized(maxDepositStr)
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgRun(caller, send, maxDeposit, pkgJSON)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
 
 	flags.AddTxFlagsToCmd(cmd)
-	cmd.Flags().String(flagSend, "", "Coins to send with the run")
+	cmd.Flags().String(flagSend, "", "Coins to send along with the package")
+	cmd.Flags().String(flagMaxDeposit, "", "Maximum amount of coins to be spent for the storage fee (if empty the VM will use a default value)")
 
 	return cmd
 }

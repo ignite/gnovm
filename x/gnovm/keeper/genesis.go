@@ -6,10 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/ignite/gnovm/x/gnovm/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 	"github.com/gnolang/gno/tm2/pkg/sdk/params"
-	"github.com/ignite/gnovm/x/gnovm/types"
 
 	"golang.org/x/tools/go/packages"
 )
