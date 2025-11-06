@@ -45,7 +45,7 @@ func NewTxCmd(addressCodec address.Codec) *cobra.Command {
 // NewAddPackageCmd returns a CLI command handler for creating a MsgAddPackage transaction.
 func NewAddPackageCmd(addressCodec address.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add-package [pkgFolder] --from creator",
+		Use:   "add-package [pkgFolder] --max-deposit [coins] --send [coins] --from creator",
 		Args:  cobra.ExactArgs(1),
 		Short: "Add a new package to the GnoVM",
 		Long:  "Add a new package to the GnoVM. Currently only one package can be added at a time.",
@@ -114,7 +114,7 @@ func NewAddPackageCmd(addressCodec address.Codec) *cobra.Command {
 // NewCallCmd returns a CLI command handler for creating a MsgCall transaction.
 func NewCallCmd(addressCodec address.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "call [pkgPath] [function] [args] --from caller",
+		Use:   "call [pkgPath] [function] [args] --max-deposit [coins] --send [coins] --from caller",
 		Args:  cobra.MinimumNArgs(2),
 		Short: "Call a package on the GnoVM",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -164,7 +164,7 @@ func NewCallCmd(addressCodec address.Codec) *cobra.Command {
 // NewRunCmd returns a CLI command handler for creating a MsgRun transaction.
 func NewRunCmd(addressCodec address.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "run [pkgFolder] --from caller",
+		Use:   "run [pkgFolder] --max-deposit [coins] --send [coins] --from caller",
 		Args:  cobra.ExactArgs(1),
 		Short: "Run a tx on the GnoVM",
 		RunE: func(cmd *cobra.Command, args []string) error {
