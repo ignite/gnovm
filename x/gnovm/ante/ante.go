@@ -46,10 +46,20 @@ func (gad *gnoAnteHandler) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool,
 		return next(ctx, tx, simulate)
 	}
 
+	// Get the gas limit from the current SDK context
+	// This was set by earlier ante handlers based on the transaction's gas wanted
+	gasLimit := ctx.GasMeter().Limit()
+
 	// Use infinite gas meter in the SDK context to prevent double-counting
-	gnoCtx, err := gad.keeper.BuildGnoContext(ctx.WithGasMeter(storetypes.NewInfiniteGasMeter()))
+	// The GnoVM has its own internal gas tracking mechanism through the transaction store
+	newCtx = ctx.WithGasMeter(storetypes.NewInfiniteGasMeter())
+	gnoCtx, err := gad.keeper.BuildGnoContext(newCtx)
 	if err != nil {
 		return ctx, fmt.Errorf("failed to build gno context: %w", err)
+	}
+
+	if !simulate {
+		gnoCtx = gnoCtx.WithGasMeter(gnostore.NewGasMeter(gnostore.Gas(gasLimit)))
 	}
 
 	// Set up defer/recover to handle gas consumption and out-of-gas errors
@@ -59,9 +69,10 @@ func (gad *gnoAnteHandler) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool,
 			switch ex := r.(type) {
 			case gnostore.OutOfGasError:
 				gasConsumed := gnoCtx.GasMeter().GasConsumed()
+
 				log := fmt.Sprintf(
-					"out of gas in location: %s; gasConsumed: %d",
-					ex.Descriptor, gasConsumed,
+					"out of gas in location: %s; gasConsumed: %d, gasLimit: %d",
+					ex.Descriptor, gasConsumed, gasLimit,
 				)
 				err = fmt.Errorf("out of gas: %s", log)
 			default:
@@ -70,9 +81,12 @@ func (gad *gnoAnteHandler) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool,
 		}
 	}()
 
-	gasConsumed := gnoCtx.GasMeter().GasConsumed()
-	// Consume the gas in the original SDK context for proper accounting
-	ctx.GasMeter().ConsumeGas(storetypes.Gas(gasConsumed), "gnovm execution")
+	// After transaction execution, sync the gas consumed from GnoVM to SDK context
+	newCtx, err = next(newCtx, tx, simulate)
+	if err == nil {
+		gasConsumed := gnoCtx.GasMeter().GasConsumed()
+		ctx.GasMeter().ConsumeGas(storetypes.Gas(gasConsumed), "gnovm execution")
+	}
 
-	return next(newCtx, tx, simulate)
+	return newCtx, err
 }
