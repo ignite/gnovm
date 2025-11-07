@@ -3,11 +3,14 @@ package keeper
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	errorsmod "cosmossdk.io/errors"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
+	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 	"github.com/gnolang/gno/tm2/pkg/std"
 
 	"github.com/ignite/gnovm/x/gnovm/types"
@@ -42,12 +45,28 @@ func (k msgServer) AddPackage(ctx context.Context, msg *types.MsgAddPackage) (*t
 		Send:       send,
 		MaxDeposit: maxDep,
 	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			switch rType := r.(type) {
+			case storetypes.ErrorOutOfGas:
+				log := fmt.Sprintf(
+					"out of gas from VM usage in location: %v; gasUsed: %d",
+					rType.Descriptor, sdkCtx.GasMeter().GasConsumed())
+
+				err = errorsmod.Wrap(sdkerrors.ErrOutOfGas, log)
+			default:
+				err = fmt.Errorf("panic while calling VM: %v", r)
+			}
+		} else {
+			// this commits the changes to the module store (that is only committed later)
+			k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
+		}
+	}()
+
 	if err := k.VMKeeper.AddPackage(gnoCtx, vmMsg); err != nil {
 		return nil, errorsmod.Wrap(err, "failed to add package")
 	}
-
-	// this commits the changes to the module store (that is only committed later)
-	k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
 
 	return &types.MsgAddPackageResponse{}, nil
 }

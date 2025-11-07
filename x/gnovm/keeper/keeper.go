@@ -118,7 +118,7 @@ func (k *Keeper) initializeVMKeeper(sdkCtx sdk.Context) error {
 		gnostore.NewStoreKey(k.memStoreKey.Name()),
 	)
 
-	chainID := sdkCtx.HeaderInfo().ChainID
+	chainID := sdkCtx.ChainID()
 	if chainID == "" {
 		k.logger.Warn("chainID is empty when building gno context, using default", "fallback", defaultChainID)
 		chainID = defaultChainID
@@ -182,7 +182,7 @@ func (k *Keeper) BuildGnoContext(sdkCtx sdk.Context) (gnosdk.Context, error) {
 		gnostore.NewStoreKey(k.memStoreKey.Name()),
 	)
 
-	chainID := sdkCtx.HeaderInfo().ChainID
+	chainID := sdkCtx.ChainID()
 	if chainID == "" {
 		k.logger.Warn("chainID is empty when building gno context, using default", "fallback", defaultChainID)
 		chainID = defaultChainID

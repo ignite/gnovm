@@ -5,7 +5,9 @@ import (
 	"fmt"
 
 	errorsmod "cosmossdk.io/errors"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 
 	"github.com/ignite/gnovm/x/gnovm/types"
@@ -31,9 +33,19 @@ func (k msgServer) Call(ctx context.Context, msg *types.MsgCall) (resp *types.Ms
 		Func:       msg.Function,
 		Args:       msg.Args,
 	}
+
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("panic while calling VM: %v", r)
+			switch rType := r.(type) {
+			case storetypes.ErrorOutOfGas:
+				log := fmt.Sprintf(
+					"out of gas from VM usage in location: %v; gasUsed: %d",
+					rType.Descriptor, sdkCtx.GasMeter().GasConsumed())
+
+				err = errorsmod.Wrap(sdkerrors.ErrOutOfGas, log)
+			default:
+				err = fmt.Errorf("panic while calling VM: %v (%v)", r, rType)
+			}
 		} else {
 			// this commits the changes to the module store (that is only committed later)
 			k.VMKeeper.CommitGnoTransactionStore(gnoCtx)

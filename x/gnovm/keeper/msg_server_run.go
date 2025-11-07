@@ -3,9 +3,12 @@ package keeper
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	errorsmod "cosmossdk.io/errors"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 	"github.com/gnolang/gno/tm2/pkg/std"
 
@@ -35,6 +38,24 @@ func (k msgServer) Run(ctx context.Context, msg *types.MsgRun) (*types.MsgRunRes
 		return nil, errorsmod.Wrap(err, "invalid package")
 	}
 
+	defer func() {
+		if r := recover(); r != nil {
+			switch rType := r.(type) {
+			case storetypes.ErrorOutOfGas:
+				log := fmt.Sprintf(
+					"out of gas from VM usage in location: %v; gasUsed: %d",
+					rType.Descriptor, sdkCtx.GasMeter().GasConsumed())
+
+				err = errorsmod.Wrap(sdkerrors.ErrOutOfGas, log)
+			default:
+				err = fmt.Errorf("panic while calling VM: %v", r)
+			}
+		} else {
+			// this commits the changes to the module store (that is only committed later)
+			k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
+		}
+	}()
+
 	resp, err := k.VMKeeper.Run(
 		gnoCtx,
 		vm.MsgRun{
@@ -47,9 +68,6 @@ func (k msgServer) Run(ctx context.Context, msg *types.MsgRun) (*types.MsgRunRes
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to run VM")
 	}
-
-	// this commits the changes to the module store (that is only committed later)
-	k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
 
 	return &types.MsgRunResponse{
 		Result: string(resp),
