@@ -167,7 +167,7 @@ func New(
 		ante.NewSigGasConsumeDecorator(app.AuthKeeper, ante.DefaultSigVerificationGasConsumer),
 		ante.NewSigVerificationDecorator(app.AuthKeeper, app.txConfig.SignModeHandler()),
 		ante.NewIncrementSequenceDecorator(app.AuthKeeper),
-		gnovmante.NewAnteHandler(),
+		gnovmante.NewAnteHandler(&app.GnovmKeeper),
 	}...))
 
 	// A custom InitChainer can be set if extra pre-init-genesis logic is required.
