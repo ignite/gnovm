@@ -332,7 +332,6 @@ func TestMsgCall_Transfer(t *testing.T) {
 	send, _ = sdk.ParseCoinsNormalized("2000stake")
 
 	maxDeposit, _ = sdk.ParseCoinsNormalized("0stake") // no storage deposit
-	deposit, _ = sdk.ParseCoinsNormalized("0stake")    // no storage deposit
 	// Expected SendCoins for the send parameter
 	f.bankKeeper.EXPECT().SendCoins(f.ctx, creatorBytes, pkgAddr, send)
 	// Expected SendCoins for the transfer realm

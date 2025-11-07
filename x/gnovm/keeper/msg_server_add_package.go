@@ -56,7 +56,7 @@ func (k msgServer) AddPackage(ctx context.Context, msg *types.MsgAddPackage) (*t
 
 				err = errorsmod.Wrap(sdkerrors.ErrOutOfGas, log)
 			default:
-				err = fmt.Errorf("panic while calling VM: %v", r)
+				err = fmt.Errorf("panic while calling VM: %v (%v)", r, rType)
 			}
 		} else {
 			// this commits the changes to the module store (that is only committed later)
