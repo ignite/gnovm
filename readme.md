@@ -26,19 +26,19 @@ The [Ignite GnoVM App](https://github.com/ignite/apps/tree/main/gnovm) simplifie
 ### Add Realm / Package
 
 ```bash
-gnovmd tx gnovm add-package ./tests/contracts/counter --from alice
+gnovmd tx gnovm add-package ./tests/contracts/counter --from alice --yes
 ```
 
 ### Call Realm / Package
 
 ```bash
-gnovmd tx gnovm call gno.land/r/demo/counter Increment --from alice
+gnovmd tx gnovm call gno.land/r/demo/counter Increment --from alice --yes
 ```
 
 ### Run Realm / Package
 
 ```bash
-gnovmd tx gnovm run ./tests/contracts/counter --from alice
+gnovmd tx gnovm run ./tests/contracts/counter --from alice --yes
 ```
 
 ### Render Realm / Package

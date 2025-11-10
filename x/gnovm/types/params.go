@@ -10,6 +10,9 @@ import (
 
 var (
 	defaultDepositCost int64 = 100_000
+	// defaultStorageCost is set to a very low value to indicate that storage is cheap.
+	// This differs from the default GnoVM principle, but this is done because storage is paid
+	// per operation in the SDK and to avoid double counting.
 	defaultStorageCost int64 = 1
 	moduleAccountAddr        = authtypes.NewModuleAddress(ModuleName)
 )
