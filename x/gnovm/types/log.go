@@ -3,6 +3,7 @@ package types
 import (
 	"context"
 	"log/slog"
+	"strings"
 
 	"cosmossdk.io/log"
 )
@@ -47,7 +48,7 @@ func (h *cosmosLoggerHandler) Enabled(_ context.Context, level slog.Level) bool 
 // combining handler-level attributes with record-level attributes.
 func (h *cosmosLoggerHandler) Handle(_ context.Context, record slog.Record) error {
 	// Build key-value pairs from attributes and record attributes
-	keyvals := make([]interface{}, 0, len(h.attrs)*2+record.NumAttrs()*2)
+	keyvals := make([]any, 0, len(h.attrs)*2+record.NumAttrs()*2)
 
 	// Add handler-level attributes
 	for _, attr := range h.attrs {
@@ -116,12 +117,12 @@ func (h *cosmosLoggerHandler) formatAttrKey(key string) string {
 		return key
 	}
 
-	result := ""
+	var result strings.Builder
 	for i, group := range h.groups {
 		if i > 0 {
-			result += "."
+			result.WriteString(".")
 		}
-		result += group
+		result.WriteString(group)
 	}
-	return result + "." + key
+	return result.String() + "." + key
 }

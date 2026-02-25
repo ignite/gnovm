@@ -123,7 +123,7 @@ func (k *vmKeeperParams) paramStoreKey(key string) string {
 }
 
 // GetAny implements vm.ParamsKeeperI.
-func (k *vmKeeperParams) GetAny(ctx gnosdk.Context, key string) interface{} {
+func (k *vmKeeperParams) GetAny(ctx gnosdk.Context, key string) any {
 	// get raw value from the store
 	data := k.GetRaw(ctx, key)
 	if len(data) == 0 {
@@ -146,7 +146,7 @@ func (k *vmKeeperParams) GetAny(ctx gnosdk.Context, key string) interface{} {
 	}
 
 	// unmarshal the value
-	var value interface{}
+	var value any
 	err := json.Unmarshal(data, &value)
 	if err != nil {
 		k.k.logger.Error("failed to unmarshal param value", "key", key, "error", err)
@@ -292,7 +292,7 @@ func (k *vmKeeperParams) GetStrings(ctx gnosdk.Context, key string, ptr *[]strin
 }
 
 // GetStruct implements vm.ParamsKeeperI.
-func (k *vmKeeperParams) GetStruct(ctx gnosdk.Context, key string, strctPtr interface{}) {
+func (k *vmKeeperParams) GetStruct(ctx gnosdk.Context, key string, strctPtr any) {
 	// get raw value from the store
 	data := k.GetRaw(ctx, key)
 	if len(data) == 0 {
@@ -344,7 +344,7 @@ func (k *vmKeeperParams) Has(ctx gnosdk.Context, key string) bool {
 }
 
 // SetAny implements vm.ParamsKeeperI.
-func (k *vmKeeperParams) SetAny(ctx gnosdk.Context, key string, value interface{}) {
+func (k *vmKeeperParams) SetAny(ctx gnosdk.Context, key string, value any) {
 	// marshal the value
 	data, err := json.Marshal(value)
 	if err != nil {
@@ -426,7 +426,7 @@ func (k *vmKeeperParams) SetStrings(ctx gnosdk.Context, key string, value []stri
 }
 
 // SetStruct implements vm.ParamsKeeperI.
-func (k *vmKeeperParams) SetStruct(ctx gnosdk.Context, key string, strct interface{}) {
+func (k *vmKeeperParams) SetStruct(ctx gnosdk.Context, key string, strct any) {
 	// marshal the value
 	data, err := json.Marshal(strct)
 	if err != nil {
