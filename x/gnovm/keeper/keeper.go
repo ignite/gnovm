@@ -21,6 +21,12 @@ import (
 	gnostore "github.com/gnolang/gno/tm2/pkg/store"
 )
 
+func init() {
+	// Update VM bech32 prefix
+	sdkConfig := sdk.GetConfig()
+	gnocrypto.SetBech32Prefixes(sdkConfig.GetBech32AccountAddrPrefix(), sdkConfig.GetBech32AccountPubPrefix())
+}
+
 type Keeper struct {
 	*vm.VMKeeper
 	// tracks if VmKeeper has been initialized
@@ -88,9 +94,6 @@ func NewKeeper(
 	k.Schema = schema
 
 	// VMKeeper will be created lazily when needed
-	// Update VM bech32 prefix
-	sdkConfig := sdk.GetConfig()
-	gnocrypto.SetBech32Prefixes(sdkConfig.GetBech32AccountAddrPrefix(), sdkConfig.GetBech32AccountPubPrefix())
 
 	return k
 }
