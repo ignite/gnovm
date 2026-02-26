@@ -4,7 +4,7 @@ Cosmos SDK module for [GnoVM](https://github.com/gnolang/gno), a virtual machine
 Cosmos SDK module scaffolded with [Ignite](https://ignite.com), a developer-friendly framework for building Cosmos SDK applications.
 
 > [!WARNING]  
-> This module is still in its alpha phase. Expect bugs and breaking changes.
+> This module is still in its beta phase.
 > Please report any issues you encounter.
 > Additionally, we currently rely on a small fork of the GnoVM containing only this PR: https://github.com/gnolang/gno/pull/4852: https://github.com/allinbits/gno/tree/denom-fix.
 

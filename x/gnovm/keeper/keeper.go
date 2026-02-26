@@ -16,9 +16,16 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 	bft "github.com/gnolang/gno/tm2/pkg/bft/types"
+	gnocrypto "github.com/gnolang/gno/tm2/pkg/crypto"
 	gnosdk "github.com/gnolang/gno/tm2/pkg/sdk"
 	gnostore "github.com/gnolang/gno/tm2/pkg/store"
 )
+
+func init() {
+	// Update VM bech32 prefix
+	sdkConfig := sdk.GetConfig()
+	gnocrypto.SetBech32Prefixes(sdkConfig.GetBech32AccountAddrPrefix(), sdkConfig.GetBech32AccountPubPrefix())
+}
 
 type Keeper struct {
 	*vm.VMKeeper
@@ -87,7 +94,6 @@ func NewKeeper(
 	k.Schema = schema
 
 	// VMKeeper will be created lazily when needed
-	// k.VMKeeper = nil initially
 
 	return k
 }

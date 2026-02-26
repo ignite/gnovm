@@ -103,7 +103,7 @@ Example:
 			top := 0
 			// If the flag string is invalid, the amount will default to 100000000.
 			if s, err := cmd.Flags().GetString(flagValidatorsStakeAmount); err == nil {
-				for _, amount := range strings.Split(s, ",") {
+				for amount := range strings.SplitSeq(s, ",") {
 					a, ok := math.NewIntFromString(amount)
 					if !ok {
 						continue
@@ -121,7 +121,7 @@ Example:
 						top += 1
 					}
 				} else {
-					for _, port := range strings.Split(s, ",") {
+					for port := range strings.SplitSeq(s, ",") {
 						args.ports[top] = port
 						top += 1
 					}
@@ -399,7 +399,7 @@ func initGenFiles(
 	}
 
 	// generate empty genesis files for each validator and save
-	for i := 0; i < numValidators; i++ {
+	for i := range numValidators {
 		if err := genDoc.SaveAs(genFiles[i]); err != nil {
 			return err
 		}
@@ -422,7 +422,7 @@ func collectGenFiles(
 	var appState json.RawMessage
 	genTime := tmtime.Now()
 
-	for i := 0; i < numValidators; i++ {
+	for i := range numValidators {
 		nodeDirName := fmt.Sprintf("%s%d", nodeDirPrefix, i)
 		nodeDir := filepath.Join(outputDir, nodeDirName)
 		gentxsDir := filepath.Join(nodeDir, "config", "gentx")

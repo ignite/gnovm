@@ -159,13 +159,6 @@ func initFixture(t testing.TB) *fixture {
 	}
 }
 
-func getGnoAddress(t *testing.T, addr []byte) string {
-	addressCodec := addresscodec.NewBech32Codec("g")
-	n, err := addressCodec.BytesToString(addr)
-	require.NoError(t, err)
-	return n
-}
-
 // TestBankerContract_DeployAndDeposit tests deploying the banker contract and depositing coins
 func TestBankerContract_DeployAndDeposit(t *testing.T) {
 	t.Parallel()
@@ -304,13 +297,17 @@ func TestBankerContract_SendCoins(t *testing.T) {
 
 	// Send coins from realm to recipient
 	transferAmount := int64(30000)
+
+	toAddr, err := f.accountKeeper.AddressCodec().BytesToString(recipient)
+	require.NoError(t, err)
+
 	msgSendCoins := gnovmtypes.NewMsgCall(
 		deployerStr,
 		nil,
 		maxDeposit,
 		mpkg.Path,
 		"SendCoins",
-		[]string{getGnoAddress(t, recipient), fmt.Sprintf("%d", transferAmount), testDenom},
+		[]string{toAddr, fmt.Sprintf("%d", transferAmount), testDenom},
 	)
 
 	res, err := f.app.RunMsg(
@@ -477,12 +474,15 @@ func TestBankerContract_MultipleTransfers(t *testing.T) {
 	}
 
 	for _, transfer := range transfers {
+		toAddr, err := f.accountKeeper.AddressCodec().BytesToString(transfer.to)
+		require.NoError(t, err)
+
 		msgSend := gnovmtypes.NewMsgCall(
 			deployerStr,
 			sendAmount, maxDeposit,
 			mpkg.Path,
 			"SendCoins",
-			[]string{getGnoAddress(t, transfer.to), fmt.Sprintf("%d", transfer.amount), testDenom},
+			[]string{toAddr, fmt.Sprintf("%d", transfer.amount), testDenom},
 		)
 
 		_, err = f.app.RunMsg(
