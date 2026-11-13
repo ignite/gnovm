@@ -115,6 +115,13 @@ func (k *Keeper) initializeVMKeeper(sdkCtx sdk.Context) error {
 		return nil
 	}
 
+	// Initialization preprocesses every stored package, as gno.land does
+	// once at node start. It runs on the first context that needs the VM,
+	// usually a transaction's, so it gets its own unmetered gas meter: it
+	// is node setup, not the transaction's work, and an out-of-gas panic
+	// here is raised in a goroutine where nothing recovers it.
+	sdkCtx = sdkCtx.WithGasMeter(storetypes.NewInfiniteGasMeter())
+
 	// Create a MultiStore wrapper for initialization
 	multiStore := NewGnovmMultiStore(
 		k.logger,
