@@ -21,6 +21,14 @@ ignite chain serve
 
 The [Ignite GnoVM App](https://github.com/ignite/apps/tree/main/gnovm) simplifies the wiring of GnoVM into your Cosmos SDK application.
 
+### Gno standard library
+
+A node loads the Gno standard library at genesis from `$GNOROOT/gnovm/stdlibs`
+and type-checks the library's test files against `$GNOROOT/gnovm/tests/stdlibs`.
+When `GNOROOT` is unset, the root is the gno module's directory, which needs the
+Go toolchain and module cache on the node. A node image without them sets
+`GNOROOT` and ships both directories from the gno version in `go.mod`.
+
 ## Usage
 
 ### Add Realm / Package

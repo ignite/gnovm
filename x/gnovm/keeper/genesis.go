@@ -5,17 +5,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 
 	"github.com/ignite/gnovm/x/gnovm/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
+	"github.com/gnolang/gno/gnovm/pkg/gnoenv"
 	"github.com/gnolang/gno/tm2/pkg/sdk/params"
-
-	"golang.org/x/tools/go/packages"
 )
-
-const defaultStdLibs = "github.com/gnolang/gno/gnovm/stdlibs"
 
 // InitGenesis initializes the module's state from a provided genesis state.
 func (k *Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) error {
@@ -56,16 +54,14 @@ func (k *Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) e
 		},
 	)
 
-	pkg, err := packages.Load(&packages.Config{Mode: packages.LoadFiles}, defaultStdLibs)
+	// Initialize the standard library from the Gno root directory: GNOROOT
+	// when set (a node image carries a copy of gnovm/stdlibs there), the gno
+	// module's directory otherwise, as the rest of gno resolves it.
+	stdlibDir, err := stdlibDir()
 	if err != nil {
-		return fmt.Errorf("failed to load gno stdlib packages: %w", err)
+		return err
 	}
-	if len(pkg) == 0 {
-		return fmt.Errorf("no gno stdlib packages found")
-	}
-
-	// Initialize the standard library
-	k.VMKeeper.LoadStdlib(gnoCtx, pkg[0].Dir)
+	k.VMKeeper.LoadStdlib(gnoCtx, stdlibDir)
 	k.VMKeeper.CommitGnoTransactionStore(gnoCtx)
 
 	return nil
@@ -114,4 +110,13 @@ func (k *Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error)
 	genesis.State = state
 
 	return genesis, nil
+}
+
+// stdlibDir returns the directory of the Gno standard library.
+func stdlibDir() (string, error) {
+	root, err := gnoenv.GuessRootDir()
+	if err != nil {
+		return "", fmt.Errorf("locating the Gno root directory (set GNOROOT): %w", err)
+	}
+	return filepath.Join(root, "gnovm", "stdlibs"), nil
 }
